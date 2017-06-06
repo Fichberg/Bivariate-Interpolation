@@ -15,49 +15,65 @@ function main(args)
   compression_rate = 5;
   ##########
 
+  # Get arguments
   [tests_enable, image_path] = extract(args);
+
+  # Get image and image matrix parameters
   [image_, image_R, image_G, image_B] = get_image_matrices(image_path);
   [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(image_);
-  printf("Computing bijection.\n");
-  [fx, bijection] = do_bijection(image_R);
-  
 
-
+  # Compress image and save the compressed images
+  printf("Compressing '%s'.\n", image_path);
+  [compressed_, compressed_R, compressed_G, compressed_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate);
+  write_compressed_images(compressed_, compressed_R, compressed_G, compressed_B);
 
 endfunction
 
-# Bijection bewtween pixels values andassociated integers
-function [fx, bijection] = do_bijection(image_)
-  fx = [];
-  bijection = [];
-  associated_integer = 0;
+function write_compressed_images(compressed_, compressed_R, compressed_G, compressed_B)
+  printf("Writing compressed image (\033[0;31mred channel\033[0m) to 'images/compressed_red.jpg'.\n");
+  imwrite(compressed_R, "../images/compressed_red.jpg");
+  printf("Writing compressed image (\033[0;32mgreen channel\033[0m) to 'images/compressed_green.jpg'.\n");
+  imwrite(compressed_G, "../images/compressed_green.jpg");
+  printf("Writing compressed image (\033[0;34mblue channel\033[0m) to 'images/compressed_blue.jpg'.\n");
+  imwrite(compressed_B, "../images/compressed_blue.jpg");
+  printf("Writing compressed image to 'images/compressed.jpg'.\n");
+  imwrite(compressed_, "../images/compressed.jpg");
+endfunction
+
+# Get compressed image matrices
+function [compressed_, compressed_R, compressed_G, compressed_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate)
+  compressed_R = compress(image_R, compression_rate);
+  compressed_G = compress(image_G, compression_rate);
+  compressed_B = compress(image_B, compression_rate);
+  compressed_ = reshape(1:(rows(compressed_R) * columns(compressed_R) * 3), rows(compressed_R), columns(compressed_R), 3);
+  compressed_(:,:,1) = compressed_R;
+  compressed_(:,:,2) = compressed_G;
+  compressed_(:,:,3) = compressed_B;
+endfunction
+
+# Compress image using the compression rate parameter
+function compressed_ = compress(image_, compression_rate)
+  compressed_ = [];
 
   row = rows(image_);
   while row >= 1
+    if rem(row, compression_rate) == 0
+      row--;
+      continue;
+    endif
+
     column = 1;
-    fx_row = [];
-
+    new_row = [];
     while column <= columns(image_)
-      integer_index = 1;
-
-      while integer_index <= rows(bijection)
-        if bijection(integer_index, 2) == image_(row, column)
-          break;
-        endif
-        integer_index++;
-      endwhile
-
-      if integer_index > rows(bijection)
-        bijection = [bijection; [associated_integer++, image_(row, column)]];
+      if rem(column, compression_rate) == 0
+        column++;
+        continue;
       endif
-      fx_row = [fx_row, bijection(integer_index, 1)];
-
+      new_row = [new_row, image_(row, column)];
       column++;
-      #row
-      #column
     endwhile
-    fx = [fx_row; fx];
     row--;
+    compressed_ = [new_row; compressed_];
   endwhile
 endfunction
 
