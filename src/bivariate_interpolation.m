@@ -38,37 +38,73 @@ function main(args)
 
   # dfx
   printf("Computing partial derivative on x (dfx) for the compressed image... ");
-  dfx = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx);
+  dfx = compute_dfx(ax, ay, bx, by, hx, hy, fx);
   printf("Done!\n");
   printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;31mred channel\033[0m)... ");
-  dfx_R = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx_R);
+  dfx_R = compute_dfx(ax, ay, bx, by, hx, hy, fx_R);
   printf("Done!\n");
   printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;32mgreen channel\033[0m)... ");
-  dfx_G = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx_G);
+  dfx_G = compute_dfx(ax, ay, bx, by, hx, hy, fx_G);
   printf("Done!\n");
   printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;34mblue channel\033[0m)... ");
-  dfx_B = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx_B);
+  dfx_B = compute_dfx(ax, ay, bx, by, hx, hy, fx_B);
   printf("Done!\n");
 
   # dfy
   printf("Computing partial derivative on y (dfy) for the compressed image... ");
-  dfy = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx);
+  dfy = compute_dfy(ax, ay, bx, by, hx, hy, fx);
   printf("Done!\n");
   printf("Computing partial derivative on y (dfy) for the compressed image (\033[0;31mred channel\033[0m)... ");
-  dfy_R = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx_R);
+  dfy_R = compute_dfy(ax, ay, bx, by, hx, hy, fx_R);
   printf("Done!\n");
   printf("Computing partial derivative on y (dfy) for the compressed image (\033[0;32mgreen channel\033[0m)... ");
-  dfy_G = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx_G);
+  dfy_G = compute_dfy(ax, ay, bx, by, hx, hy, fx_G);
   printf("Done!\n");
   printf("Computing partial derivative on y (dfy) for the compressed image (\033[0;34mblue channel\033[0m)... ");
-  dfy_B = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx_B);
+  dfy_B = compute_dfy(ax, ay, bx, by, hx, hy, fx_B);
   printf("Done!\n");
 
+  # d2fxy
+  printf("Computing mixed derivatives (d2fxy) for the compressed image... ");
+  d2fxy = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy);
+  printf("Done!\n");
+  printf("Computing mixed derivatives (d2fxy) for the compressed image (\033[0;31mred channel\033[0m)... ");
+  d2fxy_R = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy_R);
+  printf("Done!\n");
+  printf("Computing mixed derivatives (d2fxy) for the compressed image (\033[0;32mgreen channel\033[0m)... ");
+  d2fxy_G = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy_G);
+  printf("Done!\n");
+  printf("Computing mixed derivatives (d2fxy) for the compressed image (\033[0;34mblue channel\033[0m)... ");
+  d2fxy_B = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy_B);
+  printf("Done!\n");
 
 endfunction
 
+# Compute d2fxy
+function d2fxy = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy)
+  d2fxy = [];
+
+  row = rows(dfy);
+  while row >= 1
+    column = 1;
+    new_row = [];
+    while column <= columns(dfy)
+      if left_border_pixel(ax, column)
+        new_row = [new_row, (dfy(row, column + 1) - dfy(row, column)) / hx];
+      elseif right_border_pixel(bx, column)
+        new_row = [new_row, (dfy(row, column) - dfy(row, column - 1)) / hx];
+      else
+        new_row = [new_row, (dfy(row, column + 1) - dfy(row, column - 1)) / (2 * hx)];
+      endif
+      column++;
+    endwhile
+    row--;
+    d2fxy = [new_row; d2fxy];
+  endwhile
+endfunction
+
 # Compute dfy
-function dfy = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx)
+function dfy = compute_dfy(ax, ay, bx, by, hx, hy, fx)
   dfy = [];
 
   row = rows(fx);
@@ -91,7 +127,7 @@ function dfy = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx)
 endfunction
 
 # Compute dfx
-function dfx = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx)
+function dfx = compute_dfx(ax, ay, bx, by, hx, hy, fx)
   dfx = [];
 
   row = rows(fx);
