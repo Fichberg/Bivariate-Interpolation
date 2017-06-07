@@ -18,42 +18,147 @@ function main(args)
   # Get arguments
   [tests_enable, image_path] = extract(args);
 
-  # Get image and image matrix parameters
+  # Get image
   [image_, image_R, image_G, image_B] = get_image_matrices(image_path);
-  [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(image_);
+  #TODO: DELETE IF USELESS
+  #[nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(image_);
 
   # Compress image and save the compressed images
-  printf("Compressing '%s'.\n", image_path);
-  [compressed_, compressed_R, compressed_G, compressed_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate);
-  write_compressed_images(compressed_, compressed_R, compressed_G, compressed_B);
+  printf("Compressing '%s'... ", image_path);
+  [fx, fx_R, fx_G, fx_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate);
+  printf("Done!\n");
+
+  # Write compressed images (the image itself and the 3 channels separately)
+  write_compressed_images(fx, fx_R, fx_G, fx_B);
+
+  # Get compressed image parameters
+  printf("Preparing to compute partial derivatives... ");
+  [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(fx);
+  printf("Done!\n");
+
+  # dfx
+  printf("Computing partial derivative on x (dfx) for the compressed image... ");
+  dfx = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx);
+  printf("Done!\n");
+  printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;31mred channel\033[0m)... ");
+  dfx_R = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx_R);
+  printf("Done!\n");
+  printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;32mgreen channel\033[0m)... ");
+  dfx_G = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx_G);
+  printf("Done!\n");
+  printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;34mblue channel\033[0m)... ");
+  dfx_B = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx_B);
+  printf("Done!\n");
+
+  # dfy
+  printf("Computing partial derivative on y (dfy) for the compressed image... ");
+  dfy = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx);
+  printf("Done!\n");
+  printf("Computing partial derivative on y (dfy) for the compressed image (\033[0;31mred channel\033[0m)... ");
+  dfy_R = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx_R);
+  printf("Done!\n");
+  printf("Computing partial derivative on y (dfy) for the compressed image (\033[0;32mgreen channel\033[0m)... ");
+  dfy_G = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx_G);
+  printf("Done!\n");
+  printf("Computing partial derivative on y (dfy) for the compressed image (\033[0;34mblue channel\033[0m)... ");
+  dfy_B = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx_B);
+  printf("Done!\n");
+
 
 endfunction
 
-function write_compressed_images(compressed_, compressed_R, compressed_G, compressed_B)
+# Compute dfy
+function dfy = compute_dfy(nx, ny, ax, ay, bx, by, hx, hy, fx)
+  dfy = [];
+
+  row = rows(fx);
+  while row >= 1
+    column = 1;
+    new_row = [];
+    while column <= columns(fx)
+      if bot_border_pixel(ay, row)
+        new_row = [new_row, (fx(row + 1, column) - fx(row, column)) / hy];
+      elseif top_border_pixel(by, row)
+        new_row = [new_row, (fx(row, column) - fx(row - 1, column)) / hy];
+      else
+        new_row = [new_row, (fx(row + 1, column) - fx(row - 1, column)) / (2 * hy)];
+      endif
+      column++;
+    endwhile
+    row--;
+    dfy = [new_row; dfy];
+  endwhile
+endfunction
+
+# Compute dfx
+function dfx = compute_dfx(nx, ny, ax, ay, bx, by, hx, hy, fx)
+  dfx = [];
+
+  row = rows(fx);
+  while row >= 1
+    column = 1;
+    new_row = [];
+    while column <= columns(fx)
+      if left_border_pixel(ax, column)
+        new_row = [new_row, (fx(row, column + 1) - fx(row, column)) / hx];
+      elseif right_border_pixel(bx, column)
+        new_row = [new_row, (fx(row, column) - fx(row, column - 1)) / hx];
+      else
+        new_row = [new_row, (fx(row, column + 1) - fx(row, column - 1)) / (2 * hx)];
+      endif
+      column++;
+    endwhile
+    row--;
+    dfx = [new_row; dfx];
+  endwhile
+endfunction
+
+# Is the pixel part of the left border?
+function value = left_border_pixel(ax, column)
+  value = (column == ax + 1);
+endfunction
+
+# Is the pixel part of the right border?
+function value = right_border_pixel(bx, column)
+  value = (column == bx);
+endfunction
+
+# Is the pixel part of the bot border?
+function value = bot_border_pixel(ay, row)
+  value = (row == ay + 1);
+endfunction
+
+# Is the pixel part of the top border?
+function value = top_border_pixel(by, row)
+  value = (row == by);
+endfunction
+
+# Write compressed images
+function write_compressed_images(fx, fx_R, fx_G, fx_B)
   printf("Writing compressed image (\033[0;31mred channel\033[0m) to 'images/compressed_red.jpg'.\n");
-  imwrite(compressed_R, "../images/compressed_red.jpg");
+  imwrite(fx_R, "../images/compressed_red.jpg");
   printf("Writing compressed image (\033[0;32mgreen channel\033[0m) to 'images/compressed_green.jpg'.\n");
-  imwrite(compressed_G, "../images/compressed_green.jpg");
+  imwrite(fx_G, "../images/compressed_green.jpg");
   printf("Writing compressed image (\033[0;34mblue channel\033[0m) to 'images/compressed_blue.jpg'.\n");
-  imwrite(compressed_B, "../images/compressed_blue.jpg");
+  imwrite(fx_B, "../images/compressed_blue.jpg");
   printf("Writing compressed image to 'images/compressed.jpg'.\n");
-  imwrite(compressed_, "../images/compressed.jpg");
+  imwrite(fx, "../images/compressed.jpg");
 endfunction
 
 # Get compressed image matrices
-function [compressed_, compressed_R, compressed_G, compressed_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate)
-  compressed_R = compress(image_R, compression_rate);
-  compressed_G = compress(image_G, compression_rate);
-  compressed_B = compress(image_B, compression_rate);
-  compressed_ = reshape(1:(rows(compressed_R) * columns(compressed_R) * 3), rows(compressed_R), columns(compressed_R), 3);
-  compressed_(:,:,1) = compressed_R;
-  compressed_(:,:,2) = compressed_G;
-  compressed_(:,:,3) = compressed_B;
+function [fx, fx_R, fx_G, fx_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate)
+  fx_R = compress(image_R, compression_rate);
+  fx_G = compress(image_G, compression_rate);
+  fx_B = compress(image_B, compression_rate);
+  fx = reshape(1:(rows(fx_R) * columns(fx_R) * 3), rows(fx_R), columns(fx_R), 3);
+  fx(:,:,1) = fx_R;
+  fx(:,:,2) = fx_G;
+  fx(:,:,3) = fx_B;
 endfunction
 
 # Compress image using the compression rate parameter
-function compressed_ = compress(image_, compression_rate)
-  compressed_ = [];
+function fx = compress(image_, compression_rate)
+  fx = [];
 
   row = rows(image_);
   while row >= 1
@@ -73,7 +178,7 @@ function compressed_ = compress(image_, compression_rate)
       column++;
     endwhile
     row--;
-    compressed_ = [new_row; compressed_];
+    fx = [new_row; fx];
   endwhile
 endfunction
 
