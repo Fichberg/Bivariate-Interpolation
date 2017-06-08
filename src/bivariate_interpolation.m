@@ -13,6 +13,7 @@ function main(args)
   y = -0.357;
   # Compression rate
   compression_rate = 5;
+  #TODO: add as program parameters and make check-ups!
   ##########
 
   # Get arguments
@@ -20,8 +21,6 @@ function main(args)
 
   # Get image
   [image_, image_R, image_G, image_B] = get_image_matrices(image_path);
-  #TODO: DELETE IF USELESS
-  #[nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(image_);
 
   # Compress image and save the compressed images
   printf("Compressing '%s'... ", image_path);
@@ -77,6 +76,8 @@ function main(args)
   printf("Computing mixed derivatives (d2fxy) for the compressed image (\033[0;34mblue channel\033[0m)... ");
   d2fxy_B = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy_B);
   printf("Done!\n");
+
+  
 
 endfunction
 
@@ -195,10 +196,11 @@ endfunction
 # Compress image using the compression rate parameter
 function fx = compress(image_, compression_rate)
   fx = [];
+  [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(image_);
 
   row = rows(image_);
   while row >= 1
-    if rem(row, compression_rate) == 0
+    if rem(row, compression_rate) == 0 && !bot_border_pixel(ay, row) && !top_border_pixel(by, row)
       row--;
       continue;
     endif
@@ -206,7 +208,7 @@ function fx = compress(image_, compression_rate)
     column = 1;
     new_row = [];
     while column <= columns(image_)
-      if rem(column, compression_rate) == 0
+      if rem(column, compression_rate) == 0 && !left_border_pixel(ax, column) && !right_border_pixel(bx, column)
         column++;
         continue;
       endif
