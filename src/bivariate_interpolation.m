@@ -20,27 +20,24 @@ function main(args)
   [tests_enable, image_path] = extract(args);
 
   # Get image
-  [image_, image_R, image_G, image_B] = get_image_matrices(image_path);
+  [image_R, image_G, image_B] = get_image_matrices(image_path);
 
   # Compress image and save the compressed images
   printf("Compressing '%s'... ", image_path);
-  [fx, fx_R, fx_G, fx_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate);
+  [fx_R, fx_G, fx_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate);
   printf("Done!\n");
 
   # Write compressed images (the image itself and the 3 channels separately)
-  write_compressed_images(fx, fx_R, fx_G, fx_B);
+  write_compressed_images(fx_R, fx_G, fx_B);
 
   # Get compressed image parameters
   printf("Retrieving compressed image parameters... ");
-  [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(fx);
+  [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(fx_R);
   printf("Done!\n");
 
 
   ################################################ TODO: ESSA PORRA TODA E aproxdf
   # dfx
-  printf("Computing partial derivative on x (dfx) for the compressed image... ");
-  dfx = compute_dfx(ax, ay, bx, by, hx, hy, fx);
-  printf("Done!\n");
   printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;31mred channel\033[0m)... ");
   dfx_R = compute_dfx(ax, ay, bx, by, hx, hy, fx_R);
   printf("Done!\n");
@@ -52,9 +49,6 @@ function main(args)
   printf("Done!\n");
 
   # dfy
-  printf("Computing partial derivative on y (dfy) for the compressed image... ");
-  dfy = compute_dfy(ax, ay, bx, by, hx, hy, fx);
-  printf("Done!\n");
   printf("Computing partial derivative on y (dfy) for the compressed image (\033[0;31mred channel\033[0m)... ");
   dfy_R = compute_dfy(ax, ay, bx, by, hx, hy, fx_R);
   printf("Done!\n");
@@ -66,9 +60,6 @@ function main(args)
   printf("Done!\n");
 
   # d2fxy
-  printf("Computing mixed derivatives (d2fxy) for the compressed image... ");
-  d2fxy = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy);
-  printf("Done!\n");
   printf("Computing mixed derivatives (d2fxy) for the compressed image (\033[0;31mred channel\033[0m)... ");
   d2fxy_R = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy_R);
   printf("Done!\n");
@@ -112,10 +103,12 @@ function [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, hx, hy)
   endif
 endfunction
 
+# Compute bicubic method's coefficients
 function v = bicubic_method(fx, hx, hy)
   v = [];
 endfunction
 
+# Compute bilinear method's coefficients
 function vx = bilinear_method(fx, hx, hy)
   row = rows(fx);
   while row > 1
@@ -221,26 +214,20 @@ function value = top_border_pixel(by, row)
 endfunction
 
 # Write compressed images
-function write_compressed_images(fx, fx_R, fx_G, fx_B)
+function write_compressed_images(fx_R, fx_G, fx_B)
   printf("Writing compressed image (\033[0;31mred channel\033[0m) to 'images/compressed_red.jpg'.\n");
   imwrite(fx_R, "../images/compressed_red.jpg");
   printf("Writing compressed image (\033[0;32mgreen channel\033[0m) to 'images/compressed_green.jpg'.\n");
   imwrite(fx_G, "../images/compressed_green.jpg");
   printf("Writing compressed image (\033[0;34mblue channel\033[0m) to 'images/compressed_blue.jpg'.\n");
   imwrite(fx_B, "../images/compressed_blue.jpg");
-  printf("Writing compressed image to 'images/compressed.jpg'.\n");
-  imwrite(fx, "../images/compressed.jpg");
 endfunction
 
 # Get compressed image matrices
-function [fx, fx_R, fx_G, fx_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate)
+function [fx_R, fx_G, fx_B] = get_compressed_matrices(image_R, image_G, image_B, compression_rate)
   fx_R = compress(image_R, compression_rate);
   fx_G = compress(image_G, compression_rate);
   fx_B = compress(image_B, compression_rate);
-  fx = reshape(1:(rows(fx_R) * columns(fx_R) * 3), rows(fx_R), columns(fx_R), 3);
-  fx(:,:,1) = fx_R;
-  fx(:,:,2) = fx_G;
-  fx(:,:,3) = fx_B;
 endfunction
 
 # Compress image using the compression rate parameter
@@ -283,7 +270,7 @@ function [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(image_)
 endfunction
 
 # Get image and its RGB channels matircs
-function [image_, image_R, image_G, image_B] = get_image_matrices(image_path)
+function [image_R, image_G, image_B] = get_image_matrices(image_path)
   image_ = imread(image_path);
   image_R = image_(:,:,1);
   image_G = image_(:,:,2);
@@ -293,3 +280,12 @@ endfunction
 
 
 main(argv());
+
+
+
+
+
+#fx = reshape(1:(rows(fx_R) * columns(fx_R) * 3), rows(fx_R), columns(fx_R), 3);
+#fx(:,:,1) = fx_R;
+#fx(:,:,2) = fx_G;
+#fx(:,:,3) = fx_B;
