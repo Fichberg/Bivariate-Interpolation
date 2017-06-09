@@ -6,7 +6,7 @@ argument_checker;
 function main(args)
   ##########
   # Select mode. 0 = bilinear. 1 = bicubic.
-  mode = 0;
+  mode = 1;
   # Select x value. x must be in [ax, bx]
   x = 3.11;
   # Select y value. y must be in [ay, by]
@@ -35,8 +35,59 @@ function main(args)
   [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(fx_R);
   printf("Done!\n");
 
+  # Compute coefficients
+  [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy);
 
-  ################################################ TODO: ESSA PORRA TODA E aproxdf
+endfunction
+
+function [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy)
+  if mode == 0
+    printf("Computing bilinear mode coefficients for the compressed image (\033[0;31mred channel\033[0m)... ");
+    vx_R = bilinear_method(fx_R, hx, hy);
+    printf("Done!\n");
+    printf("Computing bilinear mode coefficients for the compressed image (\033[0;32mgreen channel\033[0m)... ");
+    vx_G = bilinear_method(fx_G, hx, hy);
+    printf("Done!\n");
+    printf("Computing bilinear mode coefficients for the compressed image (\033[0;34mblue channel\033[0m)... ");
+    vx_B = bilinear_method(fx_B, hx, hy);
+    printf("Done!\n");
+  else
+    # Compute derivatives
+    [dfx_R, dfx_G, dfx_B, dfy_R, dfy_G, dfy_B, d2fxy_R, d2fxy_G, d2fxy_B] = aproxdf(ax, ay, bx, by, hx, hy, fx_R, fx_G, fx_B);
+    printf("Computing bicubic mode coefficients for the compressed image (\033[0;31mred channel\033[0m)... ");
+    vx_R = bicubic_method(fx_R, hx, hy);
+    printf("Done!\n");
+    printf("Computing bicubic mode coefficients for the compressed image (\033[0;32mgreen channel\033[0m)... ");
+    vx_G = bicubic_method(fx_G, hx, hy);
+    printf("Done!\n");
+    printf("Computing bicubic mode coefficients for the compressed image (\033[0;34mblue channel\033[0m)... ");
+    vx_B = bicubic_method(fx_B, hx, hy);
+    printf("Done!\n");
+  endif
+endfunction
+
+# Compute bicubic method's coefficients
+function v = bicubic_method(fx, hx, hy)
+  v = [];
+endfunction
+
+# Compute bilinear method's coefficients
+function vx = bilinear_method(fx, hx, hy)
+  row = rows(fx);
+  while row > 1
+    column = 1;
+    while column < columns(fx)
+      vx(row - 1, column).c0 = fx(row, column);
+      vx(row - 1, column).c1 = (fx(row, column + 1) - vx(row - 1, column).c0) / hx;
+      vx(row - 1, column).c2 = (fx(row - 1, column) - vx(row - 1, column).c0) / hy;
+      vx(row - 1, column).c3 = (fx(row - 1, column + 1) - vx(row - 1, column).c0 - (hx * vx(row - 1, column).c1) - (hy * vx(row - 1, column).c2)) / (hx * hy);
+      column++;
+    endwhile
+    row--;
+  endwhile
+endfunction
+
+function [dfx_R, dfx_G, dfx_B, dfy_R, dfy_G, dfy_B, d2fxy_R, d2fxy_G, d2fxy_B] = aproxdf(ax, ay, bx, by, hx, hy, fx_R, fx_G, fx_B)
   # dfx
   printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;31mred channel\033[0m)... ");
   dfx_R = compute_dfx(ax, ay, bx, by, hx, hy, fx_R);
@@ -69,59 +120,6 @@ function main(args)
   printf("Computing mixed derivatives (d2fxy) for the compressed image (\033[0;34mblue channel\033[0m)... ");
   d2fxy_B = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy_B);
   printf("Done!\n");
-  ###################################################
-
-
-
-  # Compute coefficients
-  [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, hx, hy);
-
-endfunction
-
-function [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, hx, hy)
-  if mode == 0
-    printf("Computing bilinear mode coefficients for the compressed image (\033[0;31mred channel\033[0m)... ");
-    vx_R = bilinear_method(fx_R, hx, hy);
-    printf("Done!\n");
-    printf("Computing bilinear mode coefficients for the compressed image (\033[0;32mgreen channel\033[0m)... ");
-    vx_G = bilinear_method(fx_G, hx, hy);
-    printf("Done!\n");
-    printf("Computing bilinear mode coefficients for the compressed image (\033[0;34mblue channel\033[0m)... ");
-    vx_B = bilinear_method(fx_B, hx, hy);
-    printf("Done!\n");
-  else
-    #TODO: CHAMAR APROXDF AQUI!!!!!!!!!!!!!
-    printf("Computing bicubic mode coefficients for the compressed image (\033[0;31mred channel\033[0m)... ");
-    vx_R = bicubic_method(fx_R, hx, hy);
-    printf("Done!\n");
-    printf("Computing bicubic mode coefficients for the compressed image (\033[0;32mgreen channel\033[0m)... ");
-    vx_G = bicubic_method(fx_G, hx, hy);
-    printf("Done!\n");
-    printf("Computing bicubic mode coefficients for the compressed image (\033[0;34mblue channel\033[0m)... ");
-    vx_B = bicubic_method(fx_B, hx, hy);
-    printf("Done!\n");
-  endif
-endfunction
-
-# Compute bicubic method's coefficients
-function v = bicubic_method(fx, hx, hy)
-  v = [];
-endfunction
-
-# Compute bilinear method's coefficients
-function vx = bilinear_method(fx, hx, hy)
-  row = rows(fx);
-  while row > 1
-    column = 1;
-    while column < columns(fx)
-      vx(row - 1, column).c0 = fx(row, column);
-      vx(row - 1, column).c1 = (fx(row, column + 1) - vx(row - 1, column).c0) / hx;
-      vx(row - 1, column).c2 = (fx(row - 1, column) - vx(row - 1, column).c0) / hy;
-      vx(row - 1, column).c3 = (fx(row - 1, column + 1) - vx(row - 1, column).c0 - (hx * vx(row - 1, column).c1) - (hy * vx(row - 1, column).c2)) / (hx * hy);
-      column++;
-    endwhile
-    row--;
-  endwhile
 endfunction
 
 # Compute d2fxy
