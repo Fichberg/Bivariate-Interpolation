@@ -54,21 +54,18 @@ function [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx
   else
     # Compute derivatives
     [dfx_R, dfx_G, dfx_B, dfy_R, dfy_G, dfy_B, d2fxy_R, d2fxy_G, d2fxy_B] = aproxdf(ax, ay, bx, by, hx, hy, fx_R, fx_G, fx_B);
+    # Get matrices in function of h to compute coefficients for bicubic interpolation
+    [mx, my] = h_matrices(hx, hy);
     printf("Computing bicubic mode coefficients for the compressed image (\033[0;31mred channel\033[0m)... ");
-    vx_R = bicubic_method(fx_R, hx, hy);
+    vx_R = bicubic_method(fx_R, dfx_R, dfy_R, d2fxy_R, hx, hy, mx, my);
     printf("Done!\n");
     printf("Computing bicubic mode coefficients for the compressed image (\033[0;32mgreen channel\033[0m)... ");
-    vx_G = bicubic_method(fx_G, hx, hy);
+    vx_G = bicubic_method(fx_G, dfx_G, dfy_G, d2fxy_G, hx, hy, mx, my);
     printf("Done!\n");
     printf("Computing bicubic mode coefficients for the compressed image (\033[0;34mblue channel\033[0m)... ");
-    vx_B = bicubic_method(fx_B, hx, hy);
+    vx_B = bicubic_method(fx_B, dfx_B, dfy_B, d2fxy_B, hx, hy, mx, my);
     printf("Done!\n");
   endif
-endfunction
-
-# Compute bicubic method's coefficients
-function v = bicubic_method(fx, hx, hy)
-  v = [];
 endfunction
 
 # Compute bilinear method's coefficients
@@ -85,6 +82,60 @@ function vx = bilinear_method(fx, hx, hy)
     endwhile
     row--;
   endwhile
+endfunction
+
+# Compute bicubic method's coefficients
+function vx = bicubic_method(fx, dfx, dfy, d2fxy, hx, hy, mx, my)
+  row = rows(fx);
+  while row > 1
+    column = 1;
+    while column < columns(fx)
+
+      mh = [
+          fx(row, column),      fx(row - 1, column),      dfy(row, column),       dfy(row - 1, column);
+          fx(row, column + 1),  fx(row - 1, column + 1),  dfy(row, column + 1),   dfy(row - 1, column + 1);
+          dfx(row, column),     dfx(row - 1, column),     d2fxy(row, column),     d2fxy(row - 1, column);
+          dfx(row, column + 1), dfx(row - 1, column + 1), d2fxy(row, column + 1), d2fxy(row - 1, column + 1);
+        ];
+      mh = double(mh);
+      coefficients = mx * mh * my;
+
+      vx(row - 1, column).c0  = coefficients(1, 1);
+      vx(row - 1, column).c1  = coefficients(1, 2);
+      vx(row - 1, column).c2  = coefficients(1, 3);
+      vx(row - 1, column).c3  = coefficients(1, 4);
+      vx(row - 1, column).c4  = coefficients(2, 1);
+      vx(row - 1, column).c5  = coefficients(2, 2);
+      vx(row - 1, column).c6  = coefficients(2, 3);
+      vx(row - 1, column).c7  = coefficients(2, 4);
+      vx(row - 1, column).c8  = coefficients(3, 1);
+      vx(row - 1, column).c9  = coefficients(3, 2);
+      vx(row - 1, column).c10 = coefficients(3, 3);
+      vx(row - 1, column).c11 = coefficients(3, 4);
+      vx(row - 1, column).c12 = coefficients(4, 1);
+      vx(row - 1, column).c13 = coefficients(4, 2);
+      vx(row - 1, column).c14 = coefficients(4, 3);
+      vx(row - 1, column).c15 = coefficients(4, 4);
+      column++;
+    endwhile
+    row--;
+  endwhile
+endfunction
+
+# Compute matrices used to compute the coefficients
+function [mx, my] = h_matrices(hx, hy)
+  mx = [
+    1.0,                   0.0,                  0.0,             0.0;
+    0.0,                   0.0,                  1.0,             0.0;
+   -3.0 / (hx * hx),       3.0 / (hx * hx),     -2.0 / hx,       -1.0 / hx;
+    2.0 / (hx * hx * hx), -2.0 / (hx * hx * hx), 1.0 / (hx * hx), 1.0 / (hx * hx)
+  ];
+  my = [
+    1.0, 0.0, -3.0 / (hy * hy),  2.0 / (hy * hy * hy);
+    0.0, 0.0,  3.0 / (hy * hy), -2.0 / (hy * hy * hy);
+    0.0, 1.0, -2.0 / hy,         1.0 / (hy * hy);
+    0.0, 0.0, -1.0 / hy,         1.0 / (hy * hy)
+  ];
 endfunction
 
 function [dfx_R, dfx_G, dfx_B, dfy_R, dfy_G, dfy_B, d2fxy_R, d2fxy_G, d2fxy_B] = aproxdf(ax, ay, bx, by, hx, hy, fx_R, fx_G, fx_B)
