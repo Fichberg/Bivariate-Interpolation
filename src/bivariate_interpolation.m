@@ -38,6 +38,59 @@ function main(args)
   # Compute coefficients
   [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy);
 
+  # Enlarge image. gx will be our decompressed image
+  printf("Enlarging compressed image for the \033[0;31mR\033[0m\033[0;32mG\033[0m\033[0;34mB\033[0m channels... ");
+  [gx_R, gx_G, gx_B] = enlarge(fx_R, fx_G, fx_B, compression_rate);
+  printf("Done!\n");
+
+endfunction
+
+# Enlarge compressed image to return to its original dimensions
+function [gx_R, gx_G, gx_B] = enlarge(fx_R, fx_G, fx_B, compression_rate)
+  gx_R = []; gx_G = []; gx_B = [];
+  gx_rows = ((rows(fx_R) - 1)    * compression_rate) / (compression_rate - 1);
+  gx_cols = ((columns(fx_R) - 1) * compression_rate) / (compression_rate - 1);
+  [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(fx_R);
+
+  fx_row = rows(fx_R);
+  row = gx_rows;
+  while row >= 1
+    fx_col = column = 1;
+    new_row_R = []; new_row_G = []; new_row_B = [];
+
+    if rem(row, compression_rate) == 0
+      while column <= gx_cols
+        new_row_R = [new_row_R, -1];
+        new_row_G = [new_row_G, -1];
+        new_row_B = [new_row_B, -1];
+        column++;
+      endwhile
+      gx_R = [new_row_R; gx_R];
+      gx_G = [new_row_G; gx_G];
+      gx_B = [new_row_B; gx_B];
+      row--;
+    else
+      while column <= gx_cols
+        if rem(column, compression_rate) == 0
+          new_row_R = [new_row_R, -1];
+          new_row_G = [new_row_G, -1];
+          new_row_B = [new_row_B, -1];
+          column++;
+          continue;
+        endif
+        new_row_R = [new_row_R, fx_R(fx_row, fx_col)];
+        new_row_G = [new_row_G, fx_G(fx_row, fx_col)];
+        new_row_B = [new_row_B, fx_B(fx_row, fx_col)];
+        column++;
+        fx_col++;
+      endwhile
+      gx_R = [new_row_R; gx_R];
+      gx_G = [new_row_G; gx_G];
+      gx_B = [new_row_B; gx_B];
+      row--;
+      fx_row--;
+    endif
+  endwhile
 endfunction
 
 function [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy)
