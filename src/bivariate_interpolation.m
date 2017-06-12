@@ -123,51 +123,51 @@ endfunction
 function [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode)
   z_R = z_G = z_B = 0;
   if (left_border_pixel(ax, gx_col) && bot_border_pixel(ay, gx_row)) || (left_border_pixel(ax, gx_col) && top_border_pixel(by, gx_row)) || (right_border_pixel(bx, gx_col) && bot_border_pixel(ay, gx_row)) || (right_border_pixel(bx, gx_col) && top_border_pixel(by, gx_row))
-    x = vx_col + (hx / 2.0);
-    y = vx_row + (hy / 2.0);
+    x = vx_col + (hx / 100.0);
+    y = vx_row + (hy / 100.0);
     z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
     z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
     z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
   elseif left_border_pixel(ax, gx_col) || right_border_pixel(bx, gx_col)
     denominator = 2;
-    x = vx_col + (hx / 2.0);
-    y = vx_row + (hy / 2.0);
+    x = vx_col + (hx / 100.0);
+    y = vx_row + (hy / 100.0);
     z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
     z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
     z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
-    y = (vx_row + 1) + (hy / 2.0);
+    y = (vx_row + 1) + (hy / 100.0);
     z_R += evaluate_v(vx_R, (vx_row - 1), vx_col, x, y, mode);
     z_G += evaluate_v(vx_G, (vx_row - 1), vx_col, x, y, mode);
     z_B += evaluate_v(vx_B, (vx_row - 1), vx_col, x, y, mode);
     z_R /= 2; z_G /= 2; z_B /= 2;
   elseif bot_border_pixel(ay, gx_row) || top_border_pixel(by, gx_row)
     denominator = 2;
-    x = vx_col + (hx / 2.0);
-    y = vx_row + (hy / 2.0);
+    x = vx_col + (hx / 100.0);
+    y = vx_row + (hy / 100.0);
     z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
     z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
     z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
-    x = (vx_col - 1) + (hx / 2.0);
+    x = (vx_col - 1) + (hx / 100.0);
     z_R += evaluate_v(vx_R, vx_row, (vx_col - 1), x, y, mode);
     z_G += evaluate_v(vx_G, vx_row, (vx_col - 1), x, y, mode);
     z_B += evaluate_v(vx_B, vx_row, (vx_col - 1), x, y, mode);
     z_R /= 2; z_G /= 2; z_B /= 2;
   else
     denominator = 4;
-    x = vx_col + (hx / 2.0);
-    y = vx_row + (hy / 2.0);
+    x = vx_col + (hx / 100.0);
+    y = vx_row + (hy / 100.0);
     z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
     z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
     z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
-    x = (vx_col - 1) + (hx / 2.0);
+    x = (vx_col - 1) + (hx / 100.0);
     z_R += evaluate_v(vx_R, vx_row, (vx_col - 1), x, y, mode);
     z_G += evaluate_v(vx_G, vx_row, (vx_col - 1), x, y, mode);
     z_B += evaluate_v(vx_B, vx_row, (vx_col - 1), x, y, mode);
-    y = (vx_row + 1) + (hy / 2.0);
+    y = (vx_row + 1) + (hy / 100.0);
     z_R += evaluate_v(vx_R, (vx_row - 1), (vx_col - 1), x, y, mode);
     z_G += evaluate_v(vx_G, (vx_row - 1), (vx_col - 1), x, y, mode);
     z_B += evaluate_v(vx_B, (vx_row - 1), (vx_col - 1), x, y, mode);
-    x = vx_col + (hx / 2.0);
+    x = vx_col + (hx / 100.0);
     z_R += evaluate_v(vx_R, (vx_row - 1), vx_col, x, y, mode);
     z_G += evaluate_v(vx_G, (vx_row - 1), vx_col, x, y, mode);
     z_B += evaluate_v(vx_B, (vx_row - 1), vx_col, x, y, mode);
