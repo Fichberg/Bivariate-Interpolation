@@ -106,6 +106,9 @@ function [gx_R, gx_G, gx_B] = estimate_pixel_values(gx_R, gx_G, gx_B, vx_R, vx_G
         if rem(gx_col, compression_rate) == 0
           vx_col = gx_col - floor(gx_col / compression_rate);
           [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode);
+          gx_R(gx_row, gx_col) = round(z_R);
+          gx_G(gx_row, gx_col) = round(z_G);
+          gx_B(gx_row, gx_col) = round(z_B);
           gx_col++;
           continue;
         endif
