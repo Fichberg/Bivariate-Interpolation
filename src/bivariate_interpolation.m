@@ -28,7 +28,7 @@ function main(args)
   printf("Done!\n");
 
   # Write compressed images (the image itself and the 3 channels separately)
-  write_compressed_images(fx_R, fx_G, fx_B);
+  write_images(fx_R, fx_G, fx_B, 0);
 
   # Get compressed image parameters
   printf("Retrieving compressed image parameters... ");
@@ -43,6 +43,133 @@ function main(args)
   [gx_R, gx_G, gx_B] = enlarge(fx_R, fx_G, fx_B, compression_rate);
   printf("Done!\n");
 
+  # Compute decompressed image pixels
+  printf("Computing decompressed image pixels for the \033[0;31mR\033[0m\033[0;32mG\033[0m\033[0;34mB\033[0m channels using the v(x) polynomials... ");
+  [gx_R, gx_G, gx_B] = estimate_pixel_values(gx_R, gx_G, gx_B, vx_R, vx_G, vx_B, compression_rate, mode);
+  printf("Done!\n");
+
+  # Write decompressed images (the image itself and the 3 channels separately)
+  write_images(gx_R, gx_G, gx_B, 1);
+
+  printf("Building image from the \033[0;31mR\033[0m\033[0;32mG\033[0m\033[0;34mB\033[0m channels...");
+  fx = build_image(gx_R, gx_G, gx_B);
+  printf("Done!\n");
+
+  printf("Writing resulting image to 'images/final.jpg'...\n");
+  imwrite(fx, "../images/final.jpg");
+  printf("Done!\n");
+endfunction
+
+# Build image from the 3 channels
+function fx = build_image(fx_R, fx_G, fx_B)
+  fx = reshape(1:(rows(fx_R) * columns(fx_R) * 3), rows(fx_R), columns(fx_R), 3);
+  fx(:,:,1) = fx_R;
+  fx(:,:,2) = fx_G;
+  fx(:,:,3) = fx_B;
+endfunction
+
+# Evaluate a given point (x, y) in vx (interpolates (x,y))
+function z = evaluate_v(vx, row, col, x, y, mode)
+  if mode == 0
+    z = vx(row, column).c0 + (vx(row, col).c1 * (x - col)) + (vx(row, col).c2 * (y - row)) + (vx(row, col).c3 * ((x - col) * (y - row)));
+  else
+    left_matrix  = [1, (x - col), (x - col) * (x - col), (x - col) * (x - col) * (x - col)];
+    right_matrix = [1; (y - row); (y - row) * (y - row); (y - row) * (y - row) * (y - row)];
+    coefficients = [vx(row, col).c0,  vx(row, col).c1,  vx(row, col).c2,  vx(row, col).c3;
+                    vx(row, col).c4,  vx(row, col).c5,  vx(row, col).c6,  vx(row, col).c7;
+                    vx(row, col).c8,  vx(row, col).c9,  vx(row, col).c10, vx(row, col).c11;
+                    vx(row, col).c12, vx(row, col).c13, vx(row, col).c14, vx(row, col).c15;];
+    z = left_matrix * coefficients * right_matrix;
+  endif
+endfunction
+
+# Estimate unkown pixels values
+function [gx_R, gx_G, gx_B] = estimate_pixel_values(gx_R, gx_G, gx_B, vx_R, vx_G, vx_B, compression_rate, mode)
+  [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(gx_R);
+  gx_row = rows(gx_R);
+  while gx_row >= 1
+    gx_col = 1;
+    vx_row = gx_row - floor(gx_row / compression_rate);
+
+    if rem(gx_row, compression_rate) == 0
+      while gx_col <= columns(gx_R)
+        vx_col = gx_col - floor(gx_col / compression_rate);
+        [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode);
+        gx_R(gx_row, gx_col) = round(z_R);
+        gx_G(gx_row, gx_col) = round(z_G);
+        gx_B(gx_row, gx_col) = round(z_B);
+        gx_col++;
+      endwhile
+      gx_row--;
+    else
+      while gx_col <= columns(gx_R)
+        if rem(gx_col, compression_rate) == 0
+          vx_col = gx_col - floor(gx_col / compression_rate);
+          [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode);
+          gx_col++;
+          continue;
+        endif
+        gx_col++;
+      endwhile
+      gx_row--;
+    endif
+  endwhile
+endfunction
+
+# Compute unknown pixel value considering the mean of the interpolation values of known neightboor pixels
+function [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode)
+  z_R = z_G = z_B = 0;
+  if (left_border_pixel(ax, gx_col) && bot_border_pixel(ay, gx_row)) || (left_border_pixel(ax, gx_col) && top_border_pixel(by, gx_row)) || (right_border_pixel(bx, gx_col) && bot_border_pixel(ay, gx_row)) || (right_border_pixel(bx, gx_col) && top_border_pixel(by, gx_row))
+    x = vx_col + (hx / 2.0);
+    y = vx_row + (hy / 2.0);
+    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+  elseif left_border_pixel(ax, gx_col) || right_border_pixel(bx, gx_col)
+    denominator = 2;
+    x = vx_col + (hx / 2.0);
+    y = vx_row + (hy / 2.0);
+    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+    y = (vx_row + 1) + (hy / 2.0);
+    z_R += evaluate_v(vx_R, (vx_row - 1), vx_col, x, y, mode);
+    z_G += evaluate_v(vx_G, (vx_row - 1), vx_col, x, y, mode);
+    z_B += evaluate_v(vx_B, (vx_row - 1), vx_col, x, y, mode);
+    z_R /= 2; z_G /= 2; z_B /= 2;
+  elseif bot_border_pixel(ay, gx_row) || top_border_pixel(by, gx_row)
+    denominator = 2;
+    x = vx_col + (hx / 2.0);
+    y = vx_row + (hy / 2.0);
+    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+    x = (vx_col - 1) + (hx / 2.0);
+    z_R += evaluate_v(vx_R, vx_row, (vx_col - 1), x, y, mode);
+    z_G += evaluate_v(vx_G, vx_row, (vx_col - 1), x, y, mode);
+    z_B += evaluate_v(vx_B, vx_row, (vx_col - 1), x, y, mode);
+    z_R /= 2; z_G /= 2; z_B /= 2;
+  else
+    denominator = 4;
+    x = vx_col + (hx / 2.0);
+    y = vx_row + (hy / 2.0);
+    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+    x = (vx_col - 1) + (hx / 2.0);
+    z_R += evaluate_v(vx_R, vx_row, (vx_col - 1), x, y, mode);
+    z_G += evaluate_v(vx_G, vx_row, (vx_col - 1), x, y, mode);
+    z_B += evaluate_v(vx_B, vx_row, (vx_col - 1), x, y, mode);
+    y = (vx_row + 1) + (hy / 2.0);
+    z_R += evaluate_v(vx_R, (vx_row - 1), (vx_col - 1), x, y, mode);
+    z_G += evaluate_v(vx_G, (vx_row - 1), (vx_col - 1), x, y, mode);
+    z_B += evaluate_v(vx_B, (vx_row - 1), (vx_col - 1), x, y, mode);
+    x = vx_col + (hx / 2.0);
+    z_R += evaluate_v(vx_R, (vx_row - 1), vx_col, x, y, mode);
+    z_G += evaluate_v(vx_G, (vx_row - 1), vx_col, x, y, mode);
+    z_B += evaluate_v(vx_B, (vx_row - 1), vx_col, x, y, mode);
+    z_R /= 4; z_G /= 4; z_B /= 4;
+  endif
 endfunction
 
 # Enlarge compressed image to return to its original dimensions
@@ -315,14 +442,29 @@ function value = top_border_pixel(by, row)
   value = (row == by);
 endfunction
 
-# Write compressed images
-function write_compressed_images(fx_R, fx_G, fx_B)
-  printf("Writing compressed image (\033[0;31mred channel\033[0m) to 'images/compressed_red.jpg'.\n");
-  imwrite(fx_R, "../images/compressed_red.jpg");
-  printf("Writing compressed image (\033[0;32mgreen channel\033[0m) to 'images/compressed_green.jpg'.\n");
-  imwrite(fx_G, "../images/compressed_green.jpg");
-  printf("Writing compressed image (\033[0;34mblue channel\033[0m) to 'images/compressed_blue.jpg'.\n");
-  imwrite(fx_B, "../images/compressed_blue.jpg");
+# Write images
+function write_images(fx_R, fx_G, fx_B, img_type)
+  if img_type == 0
+    printf("Writing compressed image (\033[0;31mred channel\033[0m) to 'images/compressed_red.jpg'.\n");
+    imwrite(fx_R, "../images/compressed_red.jpg");
+  else
+    printf("Writing decompressed image (\033[0;31mred channel\033[0m) to 'images/decompressed_red.jpg'.\n");
+    imwrite(fx_R, "../images/decompressed_red.jpg");
+  endif
+  if img_type == 0
+    printf("Writing compressed image (\033[0;32mgreen channel\033[0m) to 'images/compressed_green.jpg'.\n");
+    imwrite(fx_G, "../images/compressed_green.jpg");
+  else
+    printf("Writing decompressed image (\033[0;32mgreen channel\033[0m) to 'images/decompressed_green.jpg'.\n");
+    imwrite(fx_G, "../images/decompressed_green.jpg");
+  endif
+  if img_type == 0
+    printf("Writing compressed image (\033[0;34mblue channel\033[0m) to 'images/compressed_blue.jpg'.\n");
+    imwrite(fx_B, "../images/compressed_blue.jpg");
+  else
+    printf("Writing decompressed image (\033[0;34mblue channel\033[0m) to 'images/decompressed_blue.jpg'.\n");
+    imwrite(fx_B, "../images/decompressed_blue.jpg");
+  endif
 endfunction
 
 # Get compressed image matrices
@@ -379,15 +521,4 @@ function [image_R, image_G, image_B] = get_image_matrices(image_path)
   image_B = image_(:,:,3);
 endfunction
 
-
-
 main(argv());
-
-
-
-
-
-#fx = reshape(1:(rows(fx_R) * columns(fx_R) * 3), rows(fx_R), columns(fx_R), 3);
-#fx(:,:,1) = fx_R;
-#fx(:,:,2) = fx_G;
-#fx(:,:,3) = fx_B;
