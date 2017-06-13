@@ -18,16 +18,47 @@ function main(args)
   vx = build_v(mode, fx, ax, ay, bx, by, hx, hy);
 
   # Evaluate a given point (x, y) using vx
+  printf("Evaluating f(x = %g, y = %g)... ", x, y);
   z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
+  printf("Done!\n");
 
   printf("\nf(x = %g, y = %g) = %g\n\n", x, y, z);
 
+  printf("Performing interpolation verification test...\n");
+  printf("WARNING: if you get the 'Odd' message, uncomment the print in the function 'interpolation_verification_test' and run again checking the print values to see that 'a' and 'b' are equal. It seems there is a bug in Octave...\n");
+  interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f);
 
+endfunction
+
+# Interpolation verification test
+function interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f)
+  y = ay;
+  sum = 0;
+  row = rows(vx);
+
+  while row > 1
+    column = 1;
+    x = ax;
+    while column < columns(vx)
+      a = f(x + hx, y + hy);
+      b = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
+      sum += abs(a - b);
+      #OCTAVEBUG?: printf("%f  %f\n", a, b);
+      x += hx;
+      column++;
+    endwhile
+    y += hy;
+    row--;
+  endwhile
+  if sum == 0
+    printf("Sum is %g. Therefore, |f(x, y) - v(x, y)| for every grid point (x, y) is zero, as expected (successful interpolation).\n", sum);
+  else
+    printf("Odd. This sum should really be equal to zero...\n");
+  endif
 endfunction
 
 # Evaluate a given point (x, y) in vx (interpolates (x,y))
 function z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode)
-  printf("Evaluating f(x = %g, y = %g)... ", x, y);
   row = rows(vx);
   yy = ay;
   while row > 1
@@ -59,7 +90,6 @@ function z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode)
                     vx(row, col).c12, vx(row, col).c13, vx(row, col).c14, vx(row, col).c15;];
     z = left_matrix * coefficients * right_matrix;
   endif
-  printf("Done!\n");
 endfunction
 
 # Build v(x, y)
