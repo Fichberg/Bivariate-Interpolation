@@ -20,10 +20,14 @@ function main(args)
   # Evaluate a given point (x, y) using vx
   z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
 
+  printf("\nf(x = %g, y = %g) = %g\n\n", x, y, z);
+
+
 endfunction
 
 # Evaluate a given point (x, y) in vx (interpolates (x,y))
 function z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode)
+  printf("Evaluating f(x = %g, y = %g)... ", x, y);
   row = rows(vx);
   yy = ay;
   while row > 1
@@ -55,6 +59,7 @@ function z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode)
                     vx(row, col).c12, vx(row, col).c13, vx(row, col).c14, vx(row, col).c15;];
     z = left_matrix * coefficients * right_matrix;
   endif
+  printf("Done!\n");
 endfunction
 
 # Build v(x, y)
