@@ -4,20 +4,8 @@
 argument_checker;
 
 function main(args)
-  ##########
-  # Select mode. 0 = bilinear. 1 = bicubic.
-  mode = 1;
-  # Select x value. x must be in [ax, bx]
-  x = 3.11;
-  # Select y value. y must be in [ay, by]
-  y = -0.357;
-  # Compression rate
-  compression_rate = 5;
-  #TODO: add as program parameters and make check-ups!
-  ##########
-
   # Get arguments
-  [tests_enable, image_path] = extract(args);
+  [image_path, mode, compression_rate] = extract(args);
 
   # Get image
   [image_R, image_G, image_B] = get_image_matrices(image_path);
@@ -44,7 +32,7 @@ function main(args)
   printf("Done!\n");
 
   # Compute decompressed image pixels
-  printf("Computing decompressed image pixels for the \033[0;31mR\033[0m\033[0;32mG\033[0m\033[0;34mB\033[0m channels using the v(x) polynomials... ");
+  printf("Computing decompressed image pixels for the \033[0;31mR\033[0m\033[0;32mG\033[0m\033[0;34mB\033[0m channels using the v(x, y) polynomials... ");
   [gx_R, gx_G, gx_B] = estimate_pixel_values(gx_R, gx_G, gx_B, vx_R, vx_G, vx_B, compression_rate, mode);
   printf("Done!\n");
 
@@ -52,11 +40,11 @@ function main(args)
   write_images(gx_R, gx_G, gx_B, 1);
 
   printf("Building image from the \033[0;31mR\033[0m\033[0;32mG\033[0m\033[0;34mB\033[0m channels...");
-  fx = build_image(gx_R, gx_G, gx_B);
+  gx = build_image(gx_R, gx_G, gx_B);
   printf("Done!\n");
 
   printf("Writing resulting image to 'images/final.jpg'...\n");
-  imwrite(fx, "../images/final.jpg");
+  imwrite(gx, "../images/final.jpg");
   printf("Done!\n");
 endfunction
 
@@ -71,7 +59,7 @@ endfunction
 # Evaluate a given point (x, y) in vx (interpolates (x,y))
 function z = evaluate_v(vx, row, col, x, y, mode)
   if mode == 0
-    z = vx(row, column).c0 + (vx(row, col).c1 * (x - col)) + (vx(row, col).c2 * (y - row)) + (vx(row, col).c3 * ((x - col) * (y - row)));
+    z = vx(row, col).c0 + (vx(row, col).c1 * (x - col)) + (vx(row, col).c2 * (y - row)) + (vx(row, col).c3 * ((x - col) * (y - row)));
   else
     left_matrix  = [1, (x - col), (x - col) * (x - col), (x - col) * (x - col) * (x - col)];
     right_matrix = [1; (y - row); (y - row) * (y - row); (y - row) * (y - row) * (y - row)];
@@ -321,6 +309,7 @@ function [mx, my] = h_matrices(hx, hy)
   ];
 endfunction
 
+# Compute all partial derivatives
 function [dfx_R, dfx_G, dfx_B, dfy_R, dfy_G, dfy_B, d2fxy_R, d2fxy_G, d2fxy_B] = aproxdf(ax, ay, bx, by, hx, hy, fx_R, fx_G, fx_B)
   # dfx
   printf("Computing partial derivative on x (dfx) for the compressed image (\033[0;31mred channel\033[0m)... ");
