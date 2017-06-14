@@ -18,15 +18,41 @@ function main(args)
   vx = build_v(mode, fx, ax, ay, bx, by, hx, hy);
 
   # Evaluate a given point (x, y) using vx
-  printf("Evaluating f(x = %g, y = %g)... ", x, y);
+  printf("Evaluating f(x = %g, y = %g)...\n", x, y);
   z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
   printf("Done!\n");
 
-  printf("\nf(x = %g, y = %g) = %g\n\n", x, y, z);
+  printf("f(x = %g, y = %g) = %g\n", x, y, f(x, y));
+  printf("v(x = %g, y = %g) = %g\n\n", x, y, z);
+  err = abs(f(x, y) - z);
 
   printf("Performing interpolation verification test...\n");
   printf("WARNING: if you get the 'Odd' message, uncomment the print in the function 'interpolation_verification_test' and run again checking the print values to see that 'a' and 'b' are equal. It seems there is a bug in Octave...\n");
   interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f);
+  printf("Done!\n");
+
+  if hx == hy
+    printf("Square image detected. We will test the error behaviour by increasing the number of points (nx and ny) by 2.\n");
+    printf("We expect to get a better aproximation from the real result of f(x, y). Remaining parameters will be left untouched.\n");
+    nx *= 2; ny *= 2; hx = (bx - ax) / nx; hy = (by - ay) / ny;
+
+    fx = get_image_matrix(nx, ny, ax, ay, bx, by, hx, hy, f);
+
+    # Compute coefficients
+    vx = build_v(mode, fx, ax, ay, bx, by, hx, hy);
+
+    # Evaluate a given point (x, y) using vx
+    printf("Evaluating f(x = %g, y = %g)...\n", x, y);
+    new_z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
+    err2 = abs(f(x, y) - new_z);
+    printf("\nold_v(x = %g, y = %g) = %g\n", x, y, z);
+    printf("new_v(x = %g, y = %g) = %g\n", x, y, new_z);
+    printf("f(x = %g, y = %g) = %g\n", x, y, f(x, y));
+    printf("Done!\n");
+    printf("|f(x , y) - old_v(x, y)| = %g\n", err);
+    printf("|f(x , y) - new_v(x, y)| = %g\n", err2);
+    printf("|f(x , y) - new_v(x, y)| / |f(x , y) - old_v(x, y)| = %g\n", err2 / err);
+  endif
 
 endfunction
 
