@@ -1,0 +1,1018 @@
+\documentclass[11pt]{article}
+%% Escrevendo em português
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+%\usepackage[latin1]{inputenc}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage[a4paper,margin={1in}]{geometry}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{tikz}
+\usepackage{mathtools}
+\usepackage{enumitem}
+\definecolor{warning}{rgb}{0.8, 0, 0}
+
+\renewcommand{\baselinestretch}{1.5}
+\newcommand{\vsp}{\vspace{0.2in}}
+
+\begin {document}
+
+
+\centerline{
+  \begin{minipage}[t]{5in}
+    \begin{center}
+    {\Large \bf RELATÓRIO - EP3}
+    \vsp \\
+  {\large Renan Fichberg - {\bf NUSP:} 7991131}\\
+	{\small Laboratório de Métodos Numéricos - MAC0210 - 2017/1}\\
+	{\small {\bf Professor:} Ernesto G. Birgin}\\
+  {\small {\bf Monitor:} Lucas Magno}
+    \end{center}
+  \end{minipage}
+}
+\vsp
+
+%============================================================
+\pagebreak
+
+\section{Arquivos e diretórios}
+
+\indent\indent Neste exercício programa, estão sendo entregues os seguintes arquivos e diretórios:
+
+\begin{itemize}
+  \item {\ttfamily{/docs}} - Diretório contendo este relatório.
+  \item {\ttfamily{/docs/relatorio.pdf}} - Este documento.
+  \item {\ttfamily{/images}} - Diretório que contém a imagem original e as geradas (se for rodar o programa que manipula imagens ao invés de funções).
+  \item {\ttfamily{/images/purple\_tentacle.jpg}} - Imagem original. Está sendo entregue como exemplo de entrada do programa de imagens para efeitos ilustrativos.
+  \item {\ttfamily{/images/compressed\_red.jpg}} - Imagem gerada pela compressão da imagem {\ttfamily{purple\_tentacle.jpg}}. Está sendo entregue (e o programa a escreve no disco) como exemplo de saída do programa para efeitos ilustrativos.
+  \item {\ttfamily{/images/compressed\_blue.jpg}} - Idem a imagem {\ttfamily{compressed\_red.jpg}}.
+  \item {\ttfamily{/images/compressed\_green.jpg}} - Idem as imagens {\ttfamily{compressed\_red.jpg}} e {\ttfamily{compressed\_blue.jpg}}.
+  \item {\ttfamily{/images/decompressed\_red.jpg}} - Imagem gerada pela decompressão da imagem {\ttfamily{decompressed\_red.jpg}}. Está sendo entregue como exemplo de saída do programa para efeitos ilustrativos.
+  Retorna a imagem ao estado anterior (isto é, restaura a imagem {\ttfamily{compressed\_red.jpg}} através dos métodos de interpolação bicúbica ou bilinear nos \textit{pixels} de {\ttfamily{compressed.jpg}}), com perdas.
+  \item {\ttfamily{/images/decompressed\_blue.jpg}} - Idem a imagem {\ttfamily{decompressed\_red.jpg}}.
+  \item {\ttfamily{/images/decompressed\_green.jpg}} - Idem as imagens {\ttfamily{decompressed\_red.jpg}} e {\ttfamily{decompressed\_blue.jpg}}.
+  \item {\ttfamily{/images/final.jpg}} - Junção dos canais para formar a imagem original (a qualidade está ruim por causa de um problema com a biblioteca {\ttfamily{GraphicsMagick}}).
+  \item {\ttfamily{/src}} - Diretório contendo os códigos-fonte do Exercício Programa 3.
+  \item {\ttfamily{/src/argument\_checker.m}} - Código-fonte do Exercício Programa 3 para leitura dos argumentos da CLI, chamado pelo \textit{script} principal selecionado (um dos dois listados nos itens abaixo).
+  \item {\ttfamily{/src/bivariate\_interpolation.m}} - Código-fonte do Exercício Programa 3 para manipulação de uma \textit{imagem}.
+  \item {\ttfamily{/src/bivariate\_interpolation\_test.m}} - Código-fonte do Exercício Programa 3 para manipulação de uma \textit{função conhecida f(x, y)}.
+\end{itemize}
+
+\pagebreak
+
+\section{Invocação dos Programas}
+
+\indent\indent O exercício programa foi dividido em dois \textit{scripts} devido a minha experiência obtida com o EP2, na qual eu achei que o código acabou tendo muitas condições de desvio
+que acabaram aumentando a complexidade da função principal, tornando-o difícil (e chato) de ler. Para resolver este problema, achei melhor desenvolver dois \textit{scripts} independentes. O código-fonte
+de ambos difere de muita pouca coisa, sendo que o que foi pedido tanto no EP2 quanto no EP3 está implementado da mesma forma em ambos os \textit{scripts}. Todas as funções implementadas, porém, são encontradas
+em ambos os códigos-fonte com a mesma assinatura, diferindo apenas nos parâmetros (no de imagem, os parâmetros referentes às malhas são triplicados por causa dos três canais de cores. Idem eventuais retornos das malhas
+pelas funções).
+
+\subsection{Manipulação de imagens}
+
+\indent\indent Para rodar o programa no modo imagem, é necessário estar no diretório do código-fonte `{\ttfamily{/src}}' e usar o seguinte comando:
+
+\begin{flushleft}
+  {\ttfamily{\$ ./bivariate\_interpolation.m <parametros>}}
+\end{flushleft}
+
+Onde os {\ttfamily{<parâmetros>}} disponíveis são os descritos abaixo (todos antecedidos de \textit{dois} caracters ``-''):
+
+
+\begin{itemize}
+  \item \textbf{--image}: parâmetro \textbf{mandatório}. Deve ser uma \textbf{imagem}. Os testes foram realizados na imagem que está sendo fornecida, com a extensão {\ttfamily{.jpg}}. A
+  imagem deve \textbf{obrigatoriamente} estar no diretório `{\ttfamily{/images}}'.
+  \item \textbf{--bilinear}: parâmetro \textbf{semi-mandatório}. Passe este parâmetro, sem argumentos, se quiser rodar o programa no modo de interpolação bilinear. Este
+  parâmetro está classificado como ``semi-mandatório'' pois ele não é obrigado estar presente, desde que o parâmetro para o modo bicúbico esteja. \textbf{Um dos dois parâmetros de modo
+  deve ser obrigatoriamente passado}.
+  \item \textbf{--bicubic}: parâmetro \textbf{semi-mandatório}. Idem `{\ttfamily{--bilinear}}', só que para rodar o programa no modo bicúbico. Apenas um dos parâmetros `semi-mandatórios' pode ser passado por vez.
+  \item \textbf{--cr}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número inteiro}. É a taxa de compressão da imagem (\textbf{c}ompression \textbf{r}ate). Nos testes o valor mais usado foi `5'.
+\end{itemize}
+
+\pagebreak
+
+
+Exemplo válido de invocação do \textit{script} de imagem:
+\begin{flushleft}
+  {\ttfamily{\$ ./bivariate\_interpolation.m --image purple\_tentacle.jpg --bicubic --cr 5}}
+\end{flushleft}
+
+\subsection{Manipulação de funções e rotinas de teste}
+
+\indent\indent Para rodar o programa no modo de funções, é necessário estar no diretório do código-fonte `{\ttfamily{/src}}' e usar o seguinte comando:
+
+\begin{flushleft}
+  {\ttfamily{\$ ./bivariate\_interpolation\_test.m <parametros>}}
+\end{flushleft}
+
+Onde os {\ttfamily{<parâmetros>}} disponíveis são os descritos abaixo (todos antecedidos de \textit{dois} caracters ``-''):
+
+\begin{itemize}
+  \item \textbf{--nx}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número inteiro e positivo}, conforme especificado no enunciado.
+  \item \textbf{--ny}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número inteiro e positivo}, conforme especificado no enunciado.
+  \item \textbf{--ax}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número real}, conforme especificado no enunciado.
+  \item \textbf{--bx}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número real}, conforme especificado no enunciado. Ainda, deve satisfazer a condição $a_x < b_x$.
+  \item \textbf{--ay}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número real}, conforme especificado no enunciado.
+  \item \textbf{--by}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número real}, conforme especificado no enunciado. Ainda, deve satisfazer a condição $a_y < b_y$.
+  \item \textbf{--x}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número real contido na malha}.
+  \item \textbf{--y}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número real contido na malha}.
+  \item \textbf{--bilinear}: parâmetro \textbf{semi-mandatório}. Passe este parâmetro, sem argumentos, se quiser rodar o programa no modo de interpolação bilinear. Este
+  parâmetro está classificado como ``semi-mandatório'' pois ele não é obrigado estar presente, desde que o parâmetro para o modo bicúbico esteja. \textbf{Um dos dois parâmetros de modo
+  deve ser obrigatoriamente passado}.
+  \item \textbf{--bicubic}: parâmetro \textbf{semi-mandatório}. Idem `{\ttfamily{--bilinear}}', só que para rodar o programa no modo bicúbico. Apenas um dos parâmetros `semi-mandatórios' pode ser passado por vez.
+\end{itemize}
+
+Exemplo válido de invocação do \textit{script} de funções:
+\begin{flushleft}
+  {\ttfamily{\$ ./bivariate\_interpolation\_test.m --nx 150 --ny 150 --ax -5 --bx 5 --ay -5 --by 5 --x 3.11 --y 1.42 --bicubic}}
+\end{flushleft}
+
+\subsubsection{Testes realizados neste modo}
+
+\begin{enumerate}
+  \item Teste de verificação: o programa irá tentar mostrar ao usuário que, para os valores de parâmetros escolhidos, $v$ interpola $f$ nos pontos da malha. Ou seja, será mostrado
+  que para todos os pontos $(x, y)$ da malha, $|f(x, y) - v(x, y)| = 0$.
+
+  \textbf{Nota importante:} Aparentemente foi encontrado um bug no \textit{GNU-Octave}. O exemplo fornecido abaixo para rodar
+  o programa neste modo o reproduz. O teste ira acusar como falho, mas os valores de `a' e `b' são iguais, conforme pode ser evidenciado ao remover o comentário do \textit{printf} da função `interpolation\_verification\_test'.
+  \item Teste de comportamento do erro: se o programa detectar que a área é quadrada, isto é, $h_x = h_y$, serão \textit{duplicados} os valores dos parâmetros $n_x$ e $n_y$ de forma a mostrar
+  que o erro diminui com o aumento da quantidade de pontos na malha fina (em outras palavras, quando tornamos a malha fina mais densa, fazendo \textit{h} se aproximar mais de zero. $h_x = h_y = h \rightarrow 0$) .
+  A depender dos valores iniciais de $n_x$ e $n_y$ e os valores das coordenadas do ponto $(x, y)$, claro, \textit{podem haver casos em que o teste falhe}, pois, por exemplo, o ponto $(x, y)$
+  pode estar mais perto de um ponto da malha ``fina'' que o mesmo ponto $(x, y)$ da malha ``grossa''. Isso não é esperado, mas pode ocorrer.
+\end{enumerate}
+
+\textbf{Consideração importante:} o teste de comportamento de erro irá re-executar o programa com valores superiores para os parâmetros $n_x$ e $n_y$. A depender do seu valor inicial,
+a execução do programa pode ficar consideravelmnte demorada, pois o número de pontos na malha para a realização deste teste será \textbf{consideravelmente superior}. A explicação do porque isso é feito
+já foi fornecida acima.
+
+\pagebreak
+
+\section{Dedução dos métodos de interpolação: cálculo eficiente dos coeficientes}
+
+\indent\indent Esta seção abordará detalhes do que foi feito na
+implementação para resolver o problema do EP2. Todas as definições e suposições
+feitas no enunciado já estão sendo consideradas para as explicações que se
+seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima seção.
+
+\subsection{Caso Bilinear}
+  \indent\indent Para resolver o problema de interpolação no caso bilinear, precisamos apenas
+  considerar os valores da função $f(x, y)$ em cada vértice do \textit{pixel} da
+  malha definida pelos 6 parâmetros mandatórios de entrada $n_x, n_y, a_x, b_x, a_y$ e $b_y$.
+  Para todos os efeitos, vamos sempre considerar que o ponto $(x_i, y_j)$ refere-se ao vértice
+  \textit{inferior esquerdo} do \textit{pixel}, que o ponto $(x_{i + 1}, y_j)$ refere-se ao vértice
+  \textit{inferior direito} do \textit{pixel}, que o ponto $(x, y_{j + 1})$ refere-se ao vértice
+  \textit{superior esquerdo} do \textit{pixel} e, finalmente, que o ponto $(x_{i + 1}, y_{j + 1})$
+  refere-se ao vértice do \textit{pixel} que sobrou, o \textit{superior direito}.
+
+  O polinômio dado no enunciado por
+
+  \begin{center}
+    $s_{ij}^L(x, y) = a_{00} + a_{10}(x - x_i) + a_{01}(y - y_j) + a_{11}(x - x_i)(y - y_j)$
+  \end{center}
+
+  deve interpolar $f$, e portanto, temos que a condição $f(x, y) \approx s_{ij}^L(x, y)$ deve
+  ser satisfeita. Ainda, nos pontos da malha, temos que $f(x, y) = s_{ij}^L(x, y)$, que nos
+  leva às condições de interpolação que são fornecidas no enunciado e reescritas abaixo:
+
+  \begin{center}
+    $s_{ij}^L(x_i, y_j) = f(x_i, y_j)$ \\
+    $s_{ij}^L(x_i, y_{j + 1}) = f(x_i, y_{j + 1})$ \\
+    $s_{ij}^L(x_{i + 1}, y_j) = f(x_{i + 1}, y_j)$ \\
+    $s_{ij}^L(x_{i + 1}, y_{j + 1}) = f(x_{i + 1}, y_{j + 1})$
+  \end{center}
+
+  Que podemos expandi-las para cada um dos quatro vértices do \textit{pixel}:
+
+  \begin{center}
+    $s_{ij}^L(x_i, y_j) = a_{00} + a_{10}(x_i - x_i) + a_{01}(y_j - y_j) + a_{11}(x_i - x_i)(y_j - y_j) = f(x_i, y_j)$ \\
+    $s_{ij}^L(x_i, y_{j + 1}) = a_{00} + a_{10}(x_i - x_i) + a_{01}(y_{j + 1} - y_j) + a_{11}(x_i - x_i)(y_{j + 1} - y_j) = f(x_i, y_{j + 1})$ \\
+    $s_{ij}^L(x_{i + 1}, y_j) = a_{00} + a_{10}(x_{i + 1} - x_i) + a_{01}(y_j - y_j) + a_{11}(x_{i + 1} - x_i)(y_j - y_j) = f(x_{i + 1}, y_j)$ \\
+    $s_{ij}^L(x_{i + 1}, y_{j + 1}) = a_{00} + a_{10}(x_{i + 1} - x_i) + a_{01}(y_{j + 1} - y_j) + a_{11}(x_{i + 1} - x_i)(y_{j + 1} - y_j) = f(x_{i + 1}, y_{j + 1})$
+  \end{center}
+
+  E podemos reescrever o que está representado acima matricialmente por:
+
+  \begin{center}
+    $ \begin{pmatrix}
+      a_{00} & 0         & 0         & 0 \\
+      a_{00} & 0         & a_{01}h_y & 0 \\
+      a_{00} & a_{10}h_x & 0         & 0 \\
+      a_{00} & a_{10}h_x & a_{01}h_y & a_{11}h_xh_y
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+      f(x_i, y_j)  \\
+      f(x_i, y_{j + 1})  \\
+      f(x_{i + 1}, y_j)  \\
+      f(x_{i + 1}, y_{j + 1})
+    \end{pmatrix}$
+  \end{center}
+
+  E, finalmente, obtemos uma maneira de calcular os coeficientes eficientemente:
+
+  \begin{center}
+    $ \begin{pmatrix}
+      1 & 0   & 0   & 0 \\
+      1 & 0   & h_y & 0 \\
+      1 & h_x & 0   & 0 \\
+      1 & h_x & h_y & h_xh_y
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  \\
+      a_{10}  \\
+      a_{01}  \\
+      a_{11}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}
+      f(x_i, y_j)  \\
+      f(x_i, y_{j + 1})  \\
+      f(x_{i + 1}, y_j)  \\
+      f(x_{i + 1}, y_{j + 1})
+    \end{pmatrix}$
+  \end{center}
+
+\subsection{Caso Bicúbico}
+
+  \indent\indent O caso bicúbico compartilha semelhanças com o caso bilinear explicado
+  na subseção anterior. A diferença é que agora precisamos usar os valores das derivadas
+  de primeira ordem com relação às variáveis $x$ e $y$ de cada vértice do \textit{pixel},
+  bem como as derivadas mistas de segunda ordem \textbf{também}, pois temos 12 coeficientes
+  a mais a serem determinados. Naturalmente, é suposto que a função admita a existência
+  das derivadas parciais com relação às variáveis $x$ e $y$, bem como a existência da
+  derivada mista de segunda ordem. Em outras palavras, $f$ deve ser de classe $C^2$.
+  \textbf{Observação}: o Exercício Programa \textbf{não tem implementações para realizar tais
+  checagens}. Está a cargo do usuário colocar uma função que respeite tais condições.
+
+  Analogo ao processo que fizemos na seção do caso bilinear, conjuntamente com a suposição
+  da existência das derivadas parciais já mencionadas, reescrevemos todas as 16 condições de
+  interpolação do enunciado abaixo:
+
+  \begin{center}
+    $s_{ij}^C(x_i, y_j) = f(x_i, y_j)$ \\
+    $s_{ij}^C(x_i, y_{j + 1}) = f(x_i, y_{j + 1})$ \\
+    $s_{ij}^C(x_{i + 1}, y_j) = f(x_{i + 1}, y_j)$ \\
+    $s_{ij}^C(x_{i + 1}, y_{j + 1}) = f(x_{i + 1}, y_{j + 1})$ \\
+    $\frac{\partial s_{ij}^C}{\partial y}(x_i, y_j) = \frac{\partial f}{\partial y}(x_i, y_j)$ \\
+    $\frac{\partial s_{ij}^C}{\partial x}(x_i, y_j) = \frac{\partial f}{\partial x}(x_i, y_j)$ \\
+    $\frac{\partial s_{ij}^C}{\partial y}(x_i, y_{j + 1}) = \frac{\partial f}{\partial y}(x_i, y_{j + 1})$ \\
+    $\frac{\partial s_{ij}^C}{\partial x}(x_i, y_{j + 1}) = \frac{\partial f}{\partial x}(x_i, y_{j + 1})$ \\
+    $\frac{\partial s_{ij}^C}{\partial y}(x_{i + 1}, y_j) = \frac{\partial f}{\partial y}(x_{i + 1}, y_j)$ \\
+    $\frac{\partial s_{ij}^C}{\partial x}(x_{i + 1}, y_j) = \frac{\partial f}{\partial x}(x_{i + 1}, y_j)$ \\
+    $\frac{\partial s_{ij}^C}{\partial y}(x_{i + 1}, y_{j + 1}) = \frac{\partial f}{\partial y}(x_{i + 1}, y_{j + 1})$ \\
+    $\frac{\partial s_{ij}^C}{\partial x}(x_{i + 1}, y_{j + 1}) = \frac{\partial f}{\partial x}(x_{i + 1}, y_{j + 1})$ \\
+    $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_i, y_j) = \frac{\partial^2 f}{\partial x \partial y}(x_i, y_j)$ \\
+    $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_i, y_{j + 1}) = \frac{\partial^2 f}{\partial x \partial y}(x_i, y_{j + 1})$ \\
+    $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_{i + 1}, y_j) = \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_j)$ \\
+    $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_{i + 1}, y_{j + 1}) = \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_{j + 1})$
+  \end{center}
+
+  E reescrevamos as condições de interpolação no seguinte formato matricial: \newline
+
+  \hspace*{-2.9cm}
+  {\footnotesize
+    $\begin{pmatrix}
+      s_{ij}^C(x_i, y_j)  & s_{ij}^C(x_i, y_{j + 1})             & \frac{\partial s_{ij}^C}{\partial y}(x_i, y_j) & \frac{\partial s_{ij}^C}{\partial y}(x_i, y_{j + 1}) \\
+      s_{ij}^C(x_{i + 1}, y_j)  & s_{ij}^C(x_{i + 1}, y_{j + 1}) & \frac{\partial s_{ij}^C}{\partial y}(x_{i + 1}, y_j) & \frac{\partial s_{ij}^C}{\partial y}(x_{i + 1}, y_{j + 1}) \\
+      \frac{\partial s_{ij}^C}{\partial x}(x_i, y_j) & \frac{\partial s_{ij}^C}{\partial x}(x_i, y_{j + 1}) & \frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_i, y_j) & \frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_i, y_{j + 1}) \\
+      \frac{\partial s_{ij}^C}{\partial x}(x_{i + 1}, y_j)  & \frac{\partial s_{ij}^C}{\partial x}(x_{i + 1}, y_{j + 1}) & \frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_{i + 1}, y_j) & \frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_{i + 1}, y_{j + 1})
+    \end{pmatrix} =
+    \begin{pmatrix}
+      f(x_i, y_j)                                   & f(x_i, y_{j + 1})                                   & \frac{\partial f}{\partial y}(x_i, y_j)                    & \frac{\partial f}{\partial y}(x_i, y_{j + 1}) \\
+      f(x_{i + 1}, y_j)                             & f(x_{i + 1}, y_{j + 1})                             & \frac{\partial f}{\partial y}(x_{i + 1}, y_j)              & \frac{\partial f}{\partial y}(x_{i + 1}, y_{j + 1}) \\
+      \frac{\partial f}{\partial x}(x_i, y_j)       & \frac{\partial f}{\partial x}(x_i, y_{j + 1})       & \frac{\partial^2 f}{\partial x \partial y}(x_i, y_j)       & \frac{\partial^2 f}{\partial x \partial y}(x_i, y_{j + 1}) \\
+      \frac{\partial f}{\partial x}(x_{i + 1}, y_j) & \frac{\partial f}{\partial x}(x_{i + 1}, y_{j + 1}) & \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_j) & \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_{j + 1})
+    \end{pmatrix}$}
+    \newline
+
+  Consideremos, então, a forma matricial do polinômio $s_{ij}^C(x, y)$ fornecida pelo enunciado, reproduzida abaixo:
+
+  \begin{center}
+    $ s_{ij}^C(x, y) = \begin{pmatrix}
+      1 & (x - x_i) & (x - x_i)^2 & (x - x_i)^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      (y - y_j) \\
+      (y - y_j)^2  \\
+      (y - y_j)^3
+    \end{pmatrix}$
+  \end{center}
+
+  Temos, finalmente, para cada um dos 16 polinômios $s_{ij}^C(x, y)$:
+
+  \begin{enumerate}[label=\textbf{\arabic*)}]
+    \item $s_{ij}^C(x_i, y_j)$
+
+    \begin{flushleft}
+
+      $= \begin{pmatrix}
+        1 & (x_i - x_i) & (x_i - x_i)^2 & (x_i - x_i)^3
+      \end{pmatrix}
+      \begin{pmatrix}
+        a_{00}  & a_{01} & a_{02} & a_{03} \\
+        a_{10}  & a_{11} & a_{12} & a_{13} \\
+        a_{20}  & a_{21} & a_{22} & a_{23} \\
+        a_{30}  & a_{31} & a_{32} & a_{33}
+      \end{pmatrix}
+      \begin{pmatrix}
+        1  \\
+        (y_j - y_j) \\
+        (y_j - y_j)^2  \\
+        (y_j - y_j)^3
+      \end{pmatrix}$
+
+
+      $= \begin{pmatrix}
+        1 & 0 & 0 & 0
+      \end{pmatrix}
+      \begin{pmatrix}
+        a_{00}  & a_{01} & a_{02} & a_{03} \\
+        a_{10}  & a_{11} & a_{12} & a_{13} \\
+        a_{20}  & a_{21} & a_{22} & a_{23} \\
+        a_{30}  & a_{31} & a_{32} & a_{33}
+      \end{pmatrix}
+      \begin{pmatrix}
+        1  \\
+        0  \\
+        0  \\
+        0
+      \end{pmatrix}$
+
+      $= a_{00}$
+    \end{flushleft}
+
+    \item $s_{ij}^C(x_i, y_{j + 1})$
+
+    \begin{flushleft}
+
+      $= \begin{pmatrix}
+        1 & (x_i - x_i) & (x_i - x_i)^2 & (x_i - x_i)^3
+      \end{pmatrix}
+      \begin{pmatrix}
+        a_{00}  & a_{01} & a_{02} & a_{03} \\
+        a_{10}  & a_{11} & a_{12} & a_{13} \\
+        a_{20}  & a_{21} & a_{22} & a_{23} \\
+        a_{30}  & a_{31} & a_{32} & a_{33}
+      \end{pmatrix}
+      \begin{pmatrix}
+        1  \\
+        (y_{j + 1} - y_j) \\
+        (y_{j + 1} - y_j)^2  \\
+        (y_{j + 1} - y_j)^3
+      \end{pmatrix}$
+
+
+      $= \begin{pmatrix}
+        1 & 0 & 0 & 0
+      \end{pmatrix}
+      \begin{pmatrix}
+        a_{00}  & a_{01} & a_{02} & a_{03} \\
+        a_{10}  & a_{11} & a_{12} & a_{13} \\
+        a_{20}  & a_{21} & a_{22} & a_{23} \\
+        a_{30}  & a_{31} & a_{32} & a_{33}
+      \end{pmatrix}
+      \begin{pmatrix}
+        1  \\
+        h_y  \\
+        h_y^2  \\
+        h_y^3
+      \end{pmatrix}$
+
+      $= a_{00}  + a_{01}h_y + a_{02}h_y^2 + a_{03}h_y^3 $
+    \end{flushleft}
+
+    \item $s_{ij}^C(x_{i + 1}, y_j)$
+
+    \begin{flushleft}
+
+      $= \begin{pmatrix}
+        1 & (x_{i + 1} - x_i) & (x_{i + 1} - x_i)^2 & (x_{i + 1} - x_i)^3
+      \end{pmatrix}
+      \begin{pmatrix}
+        a_{00}  & a_{01} & a_{02} & a_{03} \\
+        a_{10}  & a_{11} & a_{12} & a_{13} \\
+        a_{20}  & a_{21} & a_{22} & a_{23} \\
+        a_{30}  & a_{31} & a_{32} & a_{33}
+      \end{pmatrix}
+      \begin{pmatrix}
+        1  \\
+        (y_j - y_j) \\
+        (y_j - y_j)^2  \\
+        (y_j - y_j)^3
+      \end{pmatrix}$
+
+
+      $= \begin{pmatrix}
+        1 & h_x & h_x^2 & h_x^3
+      \end{pmatrix}
+      \begin{pmatrix}
+        a_{00}  & a_{01} & a_{02} & a_{03} \\
+        a_{10}  & a_{11} & a_{12} & a_{13} \\
+        a_{20}  & a_{21} & a_{22} & a_{23} \\
+        a_{30}  & a_{31} & a_{32} & a_{33}
+      \end{pmatrix}
+      \begin{pmatrix}
+        1  \\
+        0  \\
+        0  \\
+        0
+      \end{pmatrix}$
+
+      $= a_{00} + a_{10}h_x + a_{20}h_x^2 + a_{30}h_x^3$
+    \end{flushleft}
+
+    \item $s_{ij}^C(x_{i + 1}, y_{j + 1})$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      1 & (x_{i + 1} - x_i) & (x_{i + 1} - x_i)^2 & (x_{i + 1} - x_i)^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      (y_{j + 1} - y_j) \\
+      (y_{j + 1} - y_j)^2  \\
+      (y_{j + 1} - y_j)^3
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      1 & h_x & h_x^2 & h_x^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      h_y  \\
+      h_y^2  \\
+      h_y^3
+    \end{pmatrix}$
+
+    $= a_{00} + a_{01}h_y + a_{02}h_y^2 + a_{03}h_y^3 + a_{10}h_x + a_{11}h_xh_y + a_{12}h_xh_y^2 + a_{13}h_xh_y^3 + a_{20}h_x^2 + a_{21}h_x^2h_y + a_{22}h_x^2h_y^2 + a_{23}h_x^2h_y^3 + a_{30}h_x^3 + a_{31}h_x^3h_y + a_{32}h_x^3h_y^2 + a_{33}h_x^3h_y^3$
+    \end{flushleft}
+
+    \item $\frac{\partial s_{ij}^C}{\partial y}(x_i, y_j)$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      1 & (x_i - x_i) & (x_i - x_i)^2 & (x_i - x_i)^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_j - y_j)  \\
+      3(y_j - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      1 & 0 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      0  \\
+      0
+    \end{pmatrix}$
+
+    $= a_{01}$
+    \end{flushleft}
+
+
+    \item $\frac{\partial s_{ij}^C}{\partial y}(x_i, y_{j + 1})$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      1 & (x_i - x_i) & (x_i - x_i)^2 & (x_i - x_i)^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_{j + 1} - y_j)  \\
+      3(y_{j + 1} - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      1 & 0 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      2h_y  \\
+      3h_y^2
+    \end{pmatrix}$
+
+    $= a_{01} + 2a_{02}h_y + 3a_{03}h_y^2$
+    \end{flushleft}
+
+    \item $\frac{\partial s_{ij}^C}{\partial y}(x_{i + 1}, y_j)$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      1 & (x_{i + 1} - x_i) & (x_{i + 1} - x_i)^2 & (x_{i + 1} - x_i)^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_j - y_j)  \\
+      3(y_j - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      1 & h_x & h_x^2 & h_x^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      0  \\
+      0
+    \end{pmatrix}$
+
+    $= a_{01} + a_{11}h_x + a_{21}h_x^2 + a_{31}h_x^3$
+    \end{flushleft}
+
+    \item $\frac{\partial s_{ij}^C}{\partial y}(x_{i + 1}, y_{j + 1})$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      1 & (x_{i + 1} - x_i) & (x_{i + 1} - x_i)^2 & (x_{i + 1} - x_i)^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_{j + 1} - y_j)  \\
+      3(y_{j + 1} - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      1 & h_x & h_x^2 & h_x^3
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      2h_y  \\
+      3h_y^2
+    \end{pmatrix}$
+
+    $=  a_{01} + a_{11}h_x + a_{21}h_x^2 + a_{31}h_x^3 + 2(a_{02}h_y + a_{12}h_xh_y + a_{22}h_x^2h_y + a_{32}h_x^3h_y) + 3(a_{03}h_y^2 + a_{13}h_xh_y^2 + a_{23}h_x^2h_y^2 + 3a_{33}h_x^3h_y^2)$
+    \end{flushleft}
+
+    \item $\frac{\partial s_{ij}^C}{\partial x}(x_i, y_j)$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_i - x_i) & 3(x_i - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      (y_j - y_j) \\
+      (y_j - y_j)^2  \\
+      (y_j - y_j)^3
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      0  \\
+      0  \\
+      0
+    \end{pmatrix}$
+
+    $= a_{10}$
+    \end{flushleft}
+
+    \item $\frac{\partial s_{ij}^C}{\partial x}(x_i, y_{j + 1})$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_i - x_i) & 3(x_i - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      (y_{j + 1} - y_j) \\
+      (y_{j + 1} - y_j)^2  \\
+      (y_{j + 1} - y_j)^3
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      h_y  \\
+      h_y^2  \\
+      h_y^3
+    \end{pmatrix}$
+
+    $= a_{10} + a_{11}h_y + a_{12}h_y^2 + a_{13}h_y^3$
+    \end{flushleft}
+
+    \item $\frac{\partial s_{ij}^C}{\partial x}(x_{i + 1}, y_j)$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_{i + 1} - x_i) & 3(x_{i + 1} - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      (y_j - y_j) \\
+      (y_j - y_j)^2  \\
+      (y_j - y_j)^3
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 2h_x & 3h_x^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      0  \\
+      0  \\
+      0
+    \end{pmatrix}$
+
+    $= a_{10} + 2a_{20}h_x + 3a_{30}h_x^2$
+    \end{flushleft}
+
+    \item $\frac{\partial s_{ij}^C}{\partial x}(x_{i + 1}, y_{j + 1})$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_{i + 1} - x_i) & 3(x_{i + 1} - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      (y_{j + 1} - y_j) \\
+      (y_{j + 1} - y_j)^2  \\
+      (y_{j + 1} - y_j)^3
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 2h_x & 3h_x^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      1  \\
+      h_y  \\
+      h_y^2  \\
+      h_y^3
+    \end{pmatrix}$
+
+    $= a_{10} + a_{11}h_y + a_{12}h_y^2 + a_{13}h_y^3 + 2(a_{20}h_x + a_{21}h_xh_y + a_{22}h_xh_y^2 + a_{23}h_xh_y^3) + 3(a_{30}h_x^2 + a_{31}h_x^2h_y + a_{32}h_x^2h_y^2 + a_{33}h_x^2h_y^3)$
+    \end{flushleft}
+
+    \item $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_i, y_j)$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_i - x_i) & 3(x_i - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_j - y_j)  \\
+      3(y_j - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      0  \\
+      0
+    \end{pmatrix}$
+
+    $= a_{11}$
+    \end{flushleft}
+
+    \item $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_i, y_{j + 1})$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_i - x_i) & 3(x_i - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_{j + 1} - y_j)  \\
+      3(y_{j + 1} - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 0 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      2h_y  \\
+      3h_y^2
+    \end{pmatrix}$
+
+    $= a_{11} + 2a_{12}h_y + 3a_{13}h_y^2$
+    \end{flushleft}
+
+    \item $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_{i + 1}, y_j)$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_{i + 1} - x_i) & 3(x_{i + 1} - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_j - y_j)  \\
+      3(y_j - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 2h_x & 3h_x^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      0  \\
+      0
+    \end{pmatrix}$
+
+    $= a_{11} + 2a_{21}h_x + 3a_{31}h_x^2$
+    \end{flushleft}
+
+    \item $\frac{\partial^2 s_{ij}^C}{\partial x \partial y}(x_{i + 1}, y_{j + 1})$
+
+    \begin{flushleft}
+    $= \begin{pmatrix}
+      0 & 1 & 2(x_{i + 1} - x_i) & 3(x_{i + 1} - x_i)^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1 \\
+      2(y_{j + 1} - y_j)  \\
+      3(y_{j + 1} - y_j)^2
+    \end{pmatrix}$
+
+
+    $= \begin{pmatrix}
+      0 & 1 & 2h_x & 3h_x^2
+    \end{pmatrix}
+    \begin{pmatrix}
+      a_{00}  & a_{01} & a_{02} & a_{03} \\
+      a_{10}  & a_{11} & a_{12} & a_{13} \\
+      a_{20}  & a_{21} & a_{22} & a_{23} \\
+      a_{30}  & a_{31} & a_{32} & a_{33}
+    \end{pmatrix}
+    \begin{pmatrix}
+      0  \\
+      1  \\
+      2h_y  \\
+      3h_y^2
+    \end{pmatrix}$
+
+    $= a_{11} + 2a_{21}h_x + 3a_{31}h_x^2 + 2(a_{12}h_y + 2a_{22}h_xh_y + 3a_{32}h_x^2h_y) + 3(a_{13}h_y^2 + 2a_{23}h_xh_y^2 + 3a_{33}h_x^2h_y^2)$
+    \end{flushleft}
+
+  \end{enumerate}
+
+  Uma vez com estes 16 valores obtidos, podemos substituir as instâncias de $s_{ij}^C(x, y)$ na nossa matriz e obter a seguinte expressão matricial: \newline
+
+  \hspace*{-2.5cm}
+  {\footnotesize
+  $\begin{pmatrix}
+    1  & 0   & 0     & 0     \\
+    1  & h_x & h_x^2 & h_x^3 \\
+    0  & 1   & 0     & 0     \\
+    0  & 1   & 2h_x  & 3h_x^2
+  \end{pmatrix}
+  \begin{pmatrix}
+    a_{00}  & a_{01} & a_{02} & a_{03} \\
+    a_{10}  & a_{11} & a_{12} & a_{13} \\
+    a_{20}  & a_{21} & a_{22} & a_{23} \\
+    a_{30}  & a_{31} & a_{32} & a_{33}
+  \end{pmatrix}
+  \begin{pmatrix}
+    1  & 1     & 0 & 0 \\
+    0  & h_y   & 1 & 1 \\
+    0  & h_y^2 & 0 & 2h_y \\
+    0  & h_y^3 & 0 & 3h_y^2
+  \end{pmatrix} =
+  \begin{pmatrix}
+    f(x_i, y_j)                                   & f(x_i, y_{j + 1})                                   & \frac{\partial f}{\partial y}(x_i, y_j)                    & \frac{\partial f}{\partial y}(x_i, y_{j + 1}) \\
+    f(x_{i + 1}, y_j)                             & f(x_{i + 1}, y_{j + 1})                             & \frac{\partial f}{\partial y}(x_{i + 1}, y_j)              & \frac{\partial f}{\partial y}(x_{i + 1}, y_{j + 1}) \\
+    \frac{\partial f}{\partial x}(x_i, y_j)       & \frac{\partial f}{\partial x}(x_i, y_{j + 1})       & \frac{\partial^2 f}{\partial x \partial y}(x_i, y_j)       & \frac{\partial^2 f}{\partial x \partial y}(x_i, y_{j + 1}) \\
+    \frac{\partial f}{\partial x}(x_{i + 1}, y_j) & \frac{\partial f}{\partial x}(x_{i + 1}, y_{j + 1}) & \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_j) & \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_{j + 1})
+  \end{pmatrix}$}\newline
+
+  Precisamos isolar os coeficientes. Finalmente, supondo que a matrizes que estão multiplicando a matriz de coeficientes $a_{ij}$ sejam invertíveis
+  (como uma é transposta da outra, apesar dos termos $h_x$ e $h_y$, basta que apenas uma seja invertível que a outra também será, então a rigor fazemos
+  apenas uma suposição, e não duas), temos que:
+
+  \hspace*{-2.5cm}
+  {\footnotesize
+  $\begin{pmatrix}
+    a_{00}  & a_{01} & a_{02} & a_{03} \\
+    a_{10}  & a_{11} & a_{12} & a_{13} \\
+    a_{20}  & a_{21} & a_{22} & a_{23} \\
+    a_{30}  & a_{31} & a_{32} & a_{33}
+  \end{pmatrix} =
+  \begin{pmatrix}
+    1  & 0   & 0     & 0     \\
+    0  & 0   & 1     & 0 \\
+    \frac{-3}{h_x^2}  & \frac{3}{h_x^2}   & \frac{-2}{h_x}     & \frac{-1}{h_x}    \\
+    \frac{2}{h_x^3}  & \frac{-2}{h_x^3}   & \frac{1}{h_x^2}  & \frac{1}{h_x^2}
+  \end{pmatrix}
+  \begin{pmatrix}
+    f(x_i, y_j)                                   & f(x_i, y_{j + 1})                                   & \frac{\partial f}{\partial y}(x_i, y_j)                    & \frac{\partial f}{\partial y}(x_i, y_{j + 1}) \\
+    f(x_{i + 1}, y_j)                             & f(x_{i + 1}, y_{j + 1})                             & \frac{\partial f}{\partial y}(x_{i + 1}, y_j)              & \frac{\partial f}{\partial y}(x_{i + 1}, y_{j + 1}) \\
+    \frac{\partial f}{\partial x}(x_i, y_j)       & \frac{\partial f}{\partial x}(x_i, y_{j + 1})       & \frac{\partial^2 f}{\partial x \partial y}(x_i, y_j)       & \frac{\partial^2 f}{\partial x \partial y}(x_i, y_{j + 1}) \\
+    \frac{\partial f}{\partial x}(x_{i + 1}, y_j) & \frac{\partial f}{\partial x}(x_{i + 1}, y_{j + 1}) & \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_j) & \frac{\partial^2 f}{\partial x \partial y}(x_{i + 1}, y_{j + 1})
+  \end{pmatrix}
+  \begin{pmatrix}
+    1  & 0 & \frac{-3}{h_y^2} & \frac{2}{h_y^3} \\
+    0  & 0 & \frac{3}{h_y^2} & \frac{-2}{h_y^3} \\
+    0  & 1 & \frac{-2}{h_y} & \frac{1}{h_y^2} \\
+    0  & 0 & \frac{-1}{h_y} & \frac{1}{h_y^2}
+  \end{pmatrix}$}\newline
+
+  Uma maneira eficiente de calcular os coeficientes para realizarmos o método da interpolação bicúbica.
+
+  \pagebreak
+
+  \section{Dedução das derivadas parciais em x, em y e mistas.}
+
+  \section{Considerações Finais (e pessoais)}
+
+  \indent\indent Do EP2 para este, resolvi alguns problemas de falta de conhecimento que tinha com o \textit{GNU-Octave} para oferecer um código mais limpo e eficiente. A qualidade do código
+  com relação ao último EP está incomparavelmente superior, e desta vez eu estou entregando o EP satisfeito com os resultados obtidos e a qualidade do código. \textbf{:p}
+
+  Com relação à manipulação de imagens, o problema que eu tive com os índices no EP2 foi aparentemente resolvido neste EP, dado que eu consegui atingir resultados deveras satisfatórios para a interpolação da imagem exemplo.
+  Este EP3 não foi feito copiando e colando o EP2 e `melhorando as partes ruins'. Tudo foi replanejado e reimplementado, ora até usando outras estruturas de dados, tal como \textit{Struct Arrays}.
+
+  Finalmente, como o EP3 sugeriu uma idéia de continuidade do EP2 (e pensando em boas práticas de desenvolvimento de \textit{software}), eu resolvi aproveitar a explicação da dedução dos cálculos dos
+  coeficientes dos métodos de interpolação nessa documentação apenas porque me pareceu a coisa mais correta a se fazer, mesmo que isso não tivesse sido pedido no enunciado. Com isso a documentação fica, de fato, completa.
+
+\end{document}

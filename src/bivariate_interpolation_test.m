@@ -8,7 +8,7 @@ function main(args)
   f = @f1;
 
   # Get arguments
-  [nx, ny, ax, ay, bx, by, mode, compression_rate, x, y] = extract2(args);
+  [nx, ny, ax, ay, bx, by, mode, x, y] = extract2(args);
   hx = (bx - ax) / nx; hy = (by - ay) / ny;
 
   # Get matrix

@@ -69,9 +69,9 @@ function [img, mode, compression_rate] = extract(args)
 endfunction
 
 # Extract values from CLI to function program (used mainly to perform the tests routine)
-function [nx, ny, ax, ay, bx, by, mode, compression_rate, x, y] = extract2(args)
+function [nx, ny, ax, ay, bx, by, mode, x, y] = extract2(args)
   dont_have_x = dont_have_y = dont_have_nx = dont_have_ny = dont_have_ax = dont_have_ay = dont_have_bx = dont_have_by = true;
-  compression_rate = mode = -1;
+  mode = -1;
   img = "";
 
   i = 1;
@@ -138,21 +138,6 @@ function [nx, ny, ax, ay, bx, by, mode, compression_rate, x, y] = extract2(args)
         printf("Expected a double as argument for '--y' parameter.");
         exit;
       endif
-    elseif strcmp("--cr", args{i}) && (i < length(args))
-      try
-        compression_rate = str2num(args{i + 1});
-        if compression_rate <= 1
-          printf("Compression rate must be an integer > 1.");
-          exit;
-        elseif (compression_rate - floor(compression_rate)) > 0
-          printf("Compression rate must be an integer > 1.");
-          exit;
-        endif
-      catch
-        compression_rate
-        printf("Compression rate must be an integer > 1.");
-        exit;
-      end_try_catch
     elseif strcmp("--bicubic", args{i})
       if mode == -1
         mode = 1;
@@ -180,11 +165,6 @@ function [nx, ny, ax, ay, bx, by, mode, compression_rate, x, y] = extract2(args)
 
   if mode == -1
     printf("Missing mode. Use '--bilinear' to run in bilinear mode and '--bicubic' to run in bicubic mode.");
-    exit;
-  endif
-
-  if compression_rate == -1
-    printf("Missing compression rate. Use '--cr' <integer> to set a compression rate. Integer value must be > 1.");
     exit;
   endif
 
