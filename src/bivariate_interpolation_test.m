@@ -69,7 +69,8 @@ function interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f)
       a = f(x + hx, y + hy);
       b = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
       sum += abs(a - b);
-      #OCTAVEBUG?: printf("%f  %f\n", a, b);
+      #OCTAVEBUG?:
+      #printf("%f  %f\n", a, b);
       x += hx;
       column++;
     endwhile
@@ -232,10 +233,10 @@ function d2fxy = compute_d2fxy(ax, ay, bx, by, hx, hy, dfy)
     column = 1;
     new_row = [];
     while column <= columns(dfy)
-      if column == 1
-        new_row = [new_row, (dfy(row, column + 1) - dfy(row, column)) / hx];
-      elseif column == columns(dfy)
-        new_row = [new_row, (dfy(row, column) - dfy(row, column - 1)) / hx];
+      if left_border_pixel(ax, column)
+        new_row = [new_row, (-3 * dfy(row, column) + 4 * dfy(row, column + 1) - dfy(row, column + 2)) / (2 * hx)];
+      elseif right_border_pixel(bx, column)
+        new_row = [new_row, ( 3 * dfy(row, column) - 4 * dfy(row, column - 1) + dfy(row, column - 2)) / (2 * hx)];
       else
         new_row = [new_row, (dfy(row, column + 1) - dfy(row, column - 1)) / (2 * hx)];
       endif
@@ -255,10 +256,10 @@ function dfy = compute_dfy(ax, ay, bx, by, hx, hy, fx)
     column = 1;
     new_row = [];
     while column <= columns(fx)
-      if row == 1
-        new_row = [new_row, (fx(row + 1, column) - fx(row, column)) / hy];
-      elseif row == rows(fx)
-        new_row = [new_row, (fx(row, column) - fx(row - 1, column)) / hy];
+      if bot_border_pixel(ay, row)
+        new_row = [new_row, (-3 * fx(row, column) + 4 * fx(row + 1, column) - fx(row + 2, column)) / (2 * hy)];
+      elseif top_border_pixel(by, row)
+        new_row = [new_row, ( 3 * fx(row, column) - 4 * fx(row - 1, column) + fx(row - 2, column)) / (2 * hy)];
       else
         new_row = [new_row, (fx(row + 1, column) - fx(row - 1, column)) / (2 * hy)];
       endif
@@ -278,10 +279,10 @@ function dfx = compute_dfx(ax, ay, bx, by, hx, hy, fx)
     column = 1;
     new_row = [];
     while column <= columns(fx)
-      if column == 1
-        new_row = [new_row, (fx(row, column + 1) - fx(row, column)) / hx];
-      elseif column == columns(fx)
-        new_row = [new_row, (fx(row, column) - fx(row, column - 1)) / hx];
+      if left_border_pixel(ax, column)
+        new_row = [new_row, (-3 * fx(row, column) + 4 * fx(row, column + 1) - fx(row, column + 2)) / (2 * hx)];
+      elseif right_border_pixel(bx, column)
+        new_row = [new_row, ( 3 * fx(row, column) - 4 * fx(row, column - 1) + fx(row, column - 2)) / (2 * hx)];
       else
         new_row = [new_row, (fx(row, column + 1) - fx(row, column - 1)) / (2 * hx)];
       endif
@@ -291,6 +292,7 @@ function dfx = compute_dfx(ax, ay, bx, by, hx, hy, fx)
     dfx = [new_row; dfx];
   endwhile
 endfunction
+
 
 # Draw fx in a matrix
 function fx = get_image_matrix(nx, ny, ax, ay, bx, by, hx, hy, f)

@@ -1004,6 +1004,107 @@ seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima
 
   \section{Dedução das derivadas parciais em x, em y e mistas.}
 
+  \indent\indent Neste capítulos deduziremos formas de calcular as derivadas parciais  $\frac{\partial f}{\partial x}(x, y)$ e $\frac{\partial f}{\partial y}(x, y)$ e a derivada parcial mista
+  $\frac{\partial^2 f}{\partial x \partial y}(x, y)$ a partir da expansão do polinômio de Taylor em torno do ponto $(x_i, y_j)$. Para tal, serão usadas as expansões de 3 pontos: centrada, para frente, para trás,
+  para cima e para baixo, a depender do caso em que o ponto $(x_i, y_j)$ está em alguma borda da imagem ou não.
+
+  \subsection{Expansão do polinômio de Taylor para funções de duas variáveis}
+
+  \indent\indent Conforme mencionado anteriormente, será usada a expansão do polinômio de Taylor para função de duas variáveis para aproximar as derivadas. Abaixo é apresentada a forma
+  do polinômio $P_n$ com a expansão em torno do ponto $(x_i, y_j)$.
+
+  \vsp
+
+  \begin{center}
+  $P_n(x, y) = f\left(x_i, y_j\right) + \frac{\partial f}{\partial x}\left(x_i, y_j\right)\left(x - x_i\right) +
+    \frac{\partial f}{\partial y}\left(x_i, y_j\right)\left(y - y_j\right) + $
+
+  $+ \frac{1}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x_i, y_j\right)\left(x - x_i\right)^2 +
+  2\frac{\partial^2 f}{\partial x \partial y}\left(x_i, y_j\right)\left(x - x_i\right)\left(y - y_j\right) +
+  \frac{\partial^2 f}{\partial y^2}\left(x_i, y_j\right)\left(y - y_j\right)^2\right) + $
+
+  $+ \dots + \frac{1}{n!}\sum\limits_{k = 0}^{n} \binom{n}{k} \frac{\partial^n f}{\partial x^{n - k} \partial y^k}\left(x_i, y_j\right)\left(x - x_i\right)^{n - k}\left(y - y_j\right)^k$
+
+\end{center}
+  \vsp
+
+  \noindent {\tiny Fonte: https://en.wikipedia.org/wiki/Taylor\_series}
+
+  \subsection{Derivada parcial em x}
+
+  \indent\indent Começaremos com a derivada parcial $\frac{\partial f}{\partial x}(x, y)$, considerando a nossa malha de pontos no plano cartesiano. A depender da posição do ponto  $(x_i, y_j)$ que
+  queremos aproximar a derivada parcial na malha, devemos considerar um dos três casos abaixo:
+
+
+  \begin{enumerate}[label=\textbf{\arabic*.}]
+    \item O ponto $(x_i, y_j)$ não pertence a uma borda da imagem.
+    \item O ponto $(x_i, y_j)$ pertence à borda esquerda da imagem.
+    \item O ponto $(x_i, y_j)$ pertence à borda direita da imagem.
+  \end{enumerate}
+
+  Como estamos considerando $\frac{\partial f}{\partial x}(x, y)$ no plano cartesiano, podemos desconsiderar os casos do ponto pertencer às bordas superior ou inferior da imagem. A seguir, demonstraremos os três itens
+  enumerados acima.
+
+  \pagebreak
+
+  \subsubsection{Caso 1: o ponto não pertence a uma borda}
+
+  \indent\indent Usando o ponto $(x, y_j)$ pois o ``deslocamento'' é exclusivamente horizontal, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $f(x + h_x, y_j) = f(x, y_j) + h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+
+    $= f(x, y_j) + h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+
+
+    \item $f(x - h_x, y_j) = f(x, y_j) - h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+
+    $= f(x, y_j) - h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+  \end{enumerate}
+
+  e de \textbf{I - II} segue que:
+
+  $f(x + h_x, y_j) - f(x - h_x, y_j) = 2h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + O(h_x^3)$
+
+  e portanto:
+
+  $\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) = \frac{f(x + h_x, y_j) - f(x - h_x, y_j)}{2h_x}  + O(h_x^2)$
+
+  \subsubsection{Caso 2: o ponto pertence à borda esquerda}
+
+  \indent\indent Usando o ponto $(x, y_j)$ pois o ``deslocamento'' é exclusivamente horizontal, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $f(x + h_x, y_j) = f(x, y_j) + h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+
+    $= f(x, y_j) + h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+
+
+    \item $f(x + 2h_x, y_j) = f(x, y_j) + 2h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+
+    $+ 2h_x^2\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+
+    $= f(x, y_j) + 2h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + 2h_x^2\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+  \end{enumerate}
+
+  e de \textbf{4I - II} segue que:
+
+  $4f(x + h_x, y_j) - f(x + 2h_x, y_j) = 3f(x, y_j) + 2h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + O(h_x^3)$
+
+  e portanto:
+
+
+
   \section{Considerações Finais (e pessoais)}
 
   \indent\indent Do EP2 para este, resolvi alguns problemas de falta de conhecimento que tinha com o \textit{GNU-Octave} para oferecer um código mais limpo e eficiente. A qualidade do código
