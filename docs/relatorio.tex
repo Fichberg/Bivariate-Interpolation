@@ -1052,18 +1052,18 @@ seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima
   \indent\indent Usando o ponto $(x, y_j)$ pois o ``deslocamento'' é exclusivamente horizontal, temos:
 
   \begin{enumerate}[label=\textbf{\Roman*)}]
-    \item $f(x + h_x, y_j) = f(x, y_j) + h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+    \item $f(x + h_x, y_j) = f(x, y_j) + h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
 
     $+ \frac{h_x^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
-    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
 
     $= f(x, y_j) + h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
 
 
-    \item $f(x - h_x, y_j) = f(x, y_j) - h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+    \item $f(x - h_x, y_j) = f(x, y_j) - h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
 
     $+ \frac{h_x^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
-    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
 
     $= f(x, y_j) - h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
   \end{enumerate}
@@ -1081,18 +1081,18 @@ seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima
   \indent\indent Usando o ponto $(x, y_j)$ pois o ``deslocamento'' é exclusivamente horizontal, temos:
 
   \begin{enumerate}[label=\textbf{\Roman*)}]
-    \item $f(x + h_x, y_j) = f(x, y_j) + h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+    \item $f(x + h_x, y_j) = f(x, y_j) + h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
 
     $+ \frac{h_x^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
-    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
 
     $= f(x, y_j) + h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
 
 
-    \item $f(x + 2h_x, y_j) = f(x, y_j) + 2h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) $
+    \item $f(x + 2h_x, y_j) = f(x, y_j) + 2h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right)+ $
 
     $+ 2h_x^2\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
-    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right) \right) + O(h_x^3)$
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
 
     $= f(x, y_j) + 2h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + 2h_x^2\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
   \end{enumerate}
@@ -1103,6 +1103,243 @@ seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima
 
   e portanto:
 
+  $\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) = \frac{-3f(x, y_j) + 4f(x + h_x, y_j) - f(x + 2h_x, y_j)}{2h_x}  + O(h_x^2)$
+
+  \subsubsection{Caso 3: o ponto pertence à borda direita}
+
+  \indent\indent Usando o ponto $(x, y_j)$ pois o ``deslocamento'' é exclusivamente horizontal, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $f(x - h_x, y_j) = f(x, y_j) - h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= f(x, y_j) - h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+
+
+    \item $f(x - 2h_x, y_j) = f(x, y_j) - 2h_x\left(\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial f}{\partial y}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ 2h_x^2\left(\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= f(x, y_j) - 2h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + 2h_x^2\frac{\partial^2 f}{\partial x^2}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+  \end{enumerate}
+
+  e de \textbf{4I - II} segue que:
+
+  $4f(x - h_x, y_j) - f(x - 2h_x, y_j) = 3f(x, y_j) - 2h_x\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) + O(h_x^3)$
+
+  e portanto:
+
+  $\frac{\partial f}{\partial x}\left(x, y_j \right)\left(x - x_i \right) = \frac{3f(x, y_j) - 4f(x - h_x, y_j) + f(x - 2h_x, y_j)}{2h_x}  + O(h_x^2)$
+
+  \subsection{Derivada parcial em y}
+
+
+  \indent\indent Tomemos agora a derivada parcial $\frac{\partial f}{\partial y}(x, y)$, considerando a nossa malha de pontos no plano cartesiano. A depender da posição do ponto  $(x_i, y_j)$ que
+  queremos aproximar a derivada parcial na malha, devemos considerar um dos três casos abaixo:
+
+  \begin{enumerate}[label=\textbf{\arabic*.}]
+    \item O ponto $(x_i, y_j)$ não pertence a uma borda da imagem.
+    \item O ponto $(x_i, y_j)$ pertence à borda inferior da imagem.
+    \item O ponto $(x_i, y_j)$ pertence à borda superior da imagem.
+  \end{enumerate}
+
+  Como estamos considerando $\frac{\partial f}{\partial y}(x, y)$ no plano cartesiano, podemos desconsiderar os casos do ponto pertencer às bordas laterais da imagem. A seguir, demonstraremos os três itens
+  enumerados acima.
+
+  \subsubsection{Caso 1: o ponto não pertence a uma borda}
+
+  \indent\indent Usando o ponto $(x_i, y)$ pois o ``deslocamento'' é exclusivamente vertical, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $f(x_i, y + h_y) = f(x_i, y) + h_y\left(\frac{\partial f}{\partial x}\left(x_i, y \right)\left(x_i - x_i \right) + \frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) \right) +$
+
+    $+ \frac{h_y^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x_i, y\right)\left(x_i - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x_i, y \right)\left(x_i - x_i\right)\left(y - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 \right) + O(h_y^3)$
+
+    $= f(x_i, y) + h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + \frac{h_y^2}{2}\frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 + O(h_y^3)$
+
+
+    \item $f(x_i, y - h_y) = f(x_i, y) - h_y\left(\frac{\partial f}{\partial x}\left(x_i, y \right)\left(x_i - x_i \right) + \frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) \right) +$
+
+    $+ \frac{h_y^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x_i, y\right)\left(x_i - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x_i, y \right)\left(x_i - x_i\right)\left(y - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 \right) + O(h_y^3)$
+
+    $= f(x_i, y) - h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + \frac{h_y^2}{2}\frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 + O(h_y^3)$
+  \end{enumerate}
+
+  e de \textbf{I - II} segue que:
+
+  $f(x_i, y + h_y) - f(x_i, y - h_y) = 2h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + O(h_y^3)$
+
+  e portanto:
+
+  $\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) = \frac{f(x_i, y + h_y) - f(x_i, y - h_y)}{2h_y}  + O(h_y^2)$
+
+  \subsubsection{Caso 2: o ponto pertence à borda inferior}
+
+  \indent\indent Usando o ponto $(x_i, y)$ pois o ``deslocamento'' é exclusivamente vertical, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $f(x_i, y + h_y) = f(x_i, y) + h_y\left(\frac{\partial f}{\partial x}\left(x_i, y \right)\left(x_i - x_i \right) + \frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) \right) +$
+
+    $+ \frac{h_y^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x_i, y\right)\left(x_i - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x_i, y \right)\left(x_i - x_i\right)\left(y - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 \right) + O(h_y^3)$
+
+    $= f(x_i, y) + h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + \frac{h_y^2}{2}\frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 + O(h_y^3)$
+
+
+    \item $f(x_i, y + 2h_y) = f(x_i, y) + 2h_y\left(\frac{\partial f}{\partial x}\left(x_i, y \right)\left(x_i - x_i \right) + \frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) \right) +$
+
+    $+ 2h_y^2\left(\frac{\partial^2 f}{\partial x^2}\left(x_i, y\right)\left(x_i - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x_i, y \right)\left(x_i - x_i\right)\left(y - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 \right) + O(h_y^3)$
+
+    $= f(x_i, y) + 2h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + 2h_y^2\frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 + O(h_y^3)$
+  \end{enumerate}
+
+  e de \textbf{4I - II} segue que:
+
+  $4f(x_i, y + h_y) - f(x_i, y + 2h_y) = 3f(x_i, y) + 2h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + O(h_y^3)$
+
+  e portanto:
+
+  $\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) = \frac{-3f(x_i, y) + 4f(x_i, y + h_y) - f(x_i, y + 2h_y)}{2h_y}  + O(h_y^2)$
+
+
+  \subsubsection{Caso 3: o ponto pertence à borda superior}
+
+  \indent\indent Usando o ponto $(x_i, y)$ pois o ``deslocamento'' é exclusivamente vertical, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $f(x_i, y - h_y) = f(x_i, y) - h_y\left(\frac{\partial f}{\partial x}\left(x_i, y \right)\left(x_i - x_i \right) + \frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) \right) +$
+
+    $+ \frac{h_y^2}{2}\left(\frac{\partial^2 f}{\partial x^2}\left(x_i, y\right)\left(x_i - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x_i, y \right)\left(x_i - x_i\right)\left(y - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 \right) + O(h_y^3)$
+
+    $= f(x_i, y) - h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + \frac{h_y^2}{2}\frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 + O(h_y^3)$
+
+
+    \item $f(x_i, y - 2h_y) = f(x_i, y) - 2h_y\left(\frac{\partial f}{\partial x}\left(x_i, y \right)\left(x_i - x_i \right) + \frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) \right) +$
+
+    $+ 2h_y^2\left(\frac{\partial^2 f}{\partial x^2}\left(x_i, y\right)\left(x_i - x_i\right)^2 + 2\frac{\partial^2 f}{\partial x \partial y}\left(x_i, y \right)\left(x_i - x_i\right)\left(y - y_j\right) +
+    \frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 \right) + O(h_y^3)$
+
+    $= f(x_i, y) - 2h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + 2h_y^2\frac{\partial^2 f}{\partial y^2}\left(x_i, y\right)\left(y - y_j\right)^2 + O(h_y^3)$
+  \end{enumerate}
+
+  e de \textbf{4I - II} segue que:
+
+  $4f(x_i, y - h_y) - f(x_i, y - 2h_y) = 3f(x_i, y) - 2h_y\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) + O(h_y^3)$
+
+  e portanto:
+
+  $\frac{\partial f}{\partial y}\left(x_i, y \right)\left(y - y_j \right) = \frac{3f(x_i, y) - 4f(x_i, y - h_y) + f(x_i, y - 2h_y)}{2h_y}  + O(h_y^2)$
+
+
+  \subsection{Derivada parcial mista}
+
+  \indent\indent Tomemos agora a derivada parcial mista $\frac{\partial^2 f}{\partial x \partial y}(x, y)$, considerando a nossa malha de pontos no plano cartesiano. A depender da posição do ponto  $(x_i, y_j)$ que
+  queremos aproximar a derivada parcial na malha, devemos considerar um dos três casos abaixo:
+
+
+  \begin{enumerate}[label=\textbf{\arabic*.}]
+    \item O ponto $(x_i, y_j)$ não pertence a uma borda da imagem.
+    \item O ponto $(x_i, y_j)$ pertence à borda esquerda da imagem.
+    \item O ponto $(x_i, y_j)$ pertence à borda direita da imagem.
+  \end{enumerate}
+
+  Como estamos considerando $\frac{\partial^2 f}{\partial x \partial y}(x, y)$ no plano cartesiano, podemos desconsiderar os casos do ponto pertencer às bordas superior ou inferior da imagem. A seguir, demonstraremos os três itens
+  enumerados acima.
+
+  \textbf{Observação:} perceba que estamos calculando a derivada parcial com relação à x na função $\frac{\partial f}{\partial y}(x, y)$, e como isso significa considerar o eixo das abcissas, não é necessário trabalhar os
+  casos das bordas superior e inferior.
+
+
+  \subsubsection{Caso 1: o ponto não pertence a uma borda}
+
+  \indent\indent Usando o ponto $(x, y_j)$ pois o ``deslocamento'' é exclusivamente horizontal, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $\frac{\partial f}{\partial y}(x + h_x, y_j) = \frac{\partial f}{\partial y}(x, y_j) + h_x\left(\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial^2 f}{\partial y^2}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^3 f}{\partial x \partial y^2}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^3 f}{\partial y^3}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= \frac{\partial f}{\partial y}(x, y_j) + h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+
+
+    \item $\frac{\partial f}{\partial y}(x - h_x, y_j) = \frac{\partial f}{\partial y}(x, y_j) - h_x\left(\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial^2 f}{\partial y^2}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^3 f}{\partial x \partial y^2}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^3 f}{\partial y^3}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= \frac{\partial f}{\partial y}(x, y_j) - h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+  \end{enumerate}
+
+  e de \textbf{I - II} segue que:
+
+  $\frac{\partial f}{\partial y}(x + h_x, y_j) - \frac{\partial f}{\partial y}(x - h_x, y_j) = 2h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + O(h_x^3)$
+
+  e portanto:
+
+  $\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) = \frac{\frac{\partial f}{\partial y}(x + h_x, y_j) - \frac{\partial f}{\partial y}(x - h_x, y_j)}{2h_x}  + O(h_x^2)$
+
+  \subsubsection{Caso 2: o ponto pertence à borda esquerda}
+
+  \indent\indent Usando o ponto $(x, y_j)$ pois o ``deslocamento'' é exclusivamente horizontal, temos:
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $\frac{\partial f}{\partial y}(x + h_x, y_j) = \frac{\partial f}{\partial y}(x, y_j) + h_x\left(\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial^2 f}{\partial y^2}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^3 f}{\partial x \partial y^2}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^3 f}{\partial y^3}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= \frac{\partial f}{\partial y}(x, y_j) + h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+
+    \item $\frac{\partial f}{\partial y}(x + 2h_x, y_j) = \frac{\partial f}{\partial y}(x, y_j) + 2h_x\left(\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial^2 f}{\partial y^2}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ 2h_x^2\left(\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^3 f}{\partial x \partial y^2}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^3 f}{\partial y^3}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= \frac{\partial f}{\partial y}(x, y_j) + 2h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + 2h_x^2\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+  \end{enumerate}
+
+  e de \textbf{4I - II} segue que:
+
+  $4\frac{\partial f}{\partial y}(x + h_x, y_j) - \frac{\partial f}{\partial y}(x + 2h_x, y_j) = 3\frac{\partial f}{\partial y}(x, y_j) + 2h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + O(h_x^3)$
+
+  e portanto:
+
+  $\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) = \frac{-3\frac{\partial f}{\partial y}(x, y_j) + 4\frac{\partial f}{\partial y}(x + h_x, y_j) - \frac{\partial f}{\partial y}(x + 2h_x, y_j)}{2h_x}  + O(h_x^2)$
+
+
+  \subsubsection{Caso 3: o ponto pertence à borda direita}
+
+  \begin{enumerate}[label=\textbf{\Roman*)}]
+    \item $\frac{\partial f}{\partial y}(x - h_x, y_j) = \frac{\partial f}{\partial y}(x, y_j) - h_x\left(\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial^2 f}{\partial y^2}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ \frac{h_x^2}{2}\left(\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^3 f}{\partial x \partial y^2}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^3 f}{\partial y^3}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= \frac{\partial f}{\partial y}(x, y_j) - h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{h_x^2}{2}\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+
+    \item $\frac{\partial f}{\partial y}(x - 2h_x, y_j) = \frac{\partial f}{\partial y}(x, y_j) - 2h_x\left(\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + \frac{\partial^2 f}{\partial y^2}\left(x, y_j \right)\left(y_j - y_j \right) \right) +$
+
+    $+ 2h_x^2\left(\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + 2\frac{\partial^3 f}{\partial x \partial y^2}\left(x, y_j \right)\left(x - x_i\right)\left(y_j - y_j\right) +
+    \frac{\partial^3 f}{\partial y^3}\left(x, y_j\right)\left(y_j - y_j\right)^2 \right) + O(h_x^3)$
+
+    $= \frac{\partial f}{\partial y}(x, y_j) - 2h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + 2h_x^2\frac{\partial^3 f}{\partial x^2 \partial y}\left(x, y_j\right)\left(x - x_i\right)^2 + O(h_x^3)$
+  \end{enumerate}
+
+  e de \textbf{4I - II} segue que:
+
+  $4\frac{\partial f}{\partial y}(x - h_x, y_j) - \frac{\partial f}{\partial y}(x - 2h_x, y_j) = 3\frac{\partial f}{\partial y}(x, y_j) - 2h_x\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) + O(h_x^3)$
+
+  e portanto:
+
+  $\frac{\partial^2 f}{\partial x \partial y}\left(x, y_j \right)\left(x - x_i \right) = \frac{3\frac{\partial f}{\partial y}(x, y_j) - 4\frac{\partial f}{\partial y}(x - h_x, y_j) + \frac{\partial f}{\partial y}(x - 2h_x, y_j)}{2h_x}  + O(h_x^2)$
 
 
   \section{Considerações Finais (e pessoais)}
@@ -1112,6 +1349,9 @@ seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima
 
   Com relação à manipulação de imagens, o problema que eu tive com os índices no EP2 foi aparentemente resolvido neste EP, dado que eu consegui atingir resultados deveras satisfatórios para a interpolação da imagem exemplo.
   Este EP3 não foi feito copiando e colando o EP2 e `melhorando as partes ruins'. Tudo foi replanejado e reimplementado, ora até usando outras estruturas de dados, tal como \textit{Struct Arrays}.
+
+  Ainda, a maneira que eu aproximei as imagens no EP2 não usou nas bordas as expansões de Taylor para 3 pontos para frente, para trás, para cima e para baixo (apenas fazia a média aritmética entre o ponto da borda
+  e o \textit{pixel} vizinho conhecido do eixo correspondente), diferentemente do que foi feito neste EP3.
 
   Finalmente, como o EP3 sugeriu uma idéia de continuidade do EP2 (e pensando em boas práticas de desenvolvimento de \textit{software}), eu resolvi aproveitar a explicação da dedução dos cálculos dos
   coeficientes dos métodos de interpolação nessa documentação apenas porque me pareceu a coisa mais correta a se fazer, mesmo que isso não tivesse sido pedido no enunciado. Com isso a documentação fica, de fato, completa.
