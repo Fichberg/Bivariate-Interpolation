@@ -2,6 +2,7 @@
 %% Escrevendo em português
 \usepackage[brazil]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{caption}
 %\usepackage[latin1]{inputenc}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage[a4paper,margin={1in}]{geometry}
@@ -11,6 +12,14 @@
 \usepackage{mathtools}
 \usepackage{enumitem}
 \definecolor{warning}{rgb}{0.8, 0, 0}
+
+\definecolor{gray}{rgb}{0.18, 0.31, 0.31}
+\definecolor{apx1}{rgb}{0.25, 0.22, 0.36}
+\definecolor{apx2}{rgb}{0.29, 0.31, 0.4}
+\definecolor{apx3}{rgb}{0.1, 0.25, 0.43}
+\definecolor{apx4}{rgb}{0.14, 0.2, 0.18}
+\definecolor{red}{rgb}{1, 0.0, 0.0}
+\definecolor{blue}{rgb}{0.0, 0.0, 1}
 
 \renewcommand{\baselinestretch}{1.5}
 \newcommand{\vsp}{\vspace{0.2in}}
@@ -86,7 +95,7 @@ Onde os {\ttfamily{<parâmetros>}} disponíveis são os descritos abaixo (todos 
   parâmetro está classificado como ``semi-mandatório'' pois ele não é obrigado estar presente, desde que o parâmetro para o modo bicúbico esteja. \textbf{Um dos dois parâmetros de modo
   deve ser obrigatoriamente passado}.
   \item \textbf{--bicubic}: parâmetro \textbf{semi-mandatório}. Idem `{\ttfamily{--bilinear}}', só que para rodar o programa no modo bicúbico. Apenas um dos parâmetros `semi-mandatórios' pode ser passado por vez.
-  \item \textbf{--cr}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número inteiro}. É a taxa de compressão da imagem (\textbf{c}ompression \textbf{r}ate). Nos testes o valor mais usado foi `5'.
+  \item \textbf{--cr}: parâmetro \textbf{mandatório}. Deve ser um \textbf{número inteiro $\geq$ 5}. É a taxa de compressão da imagem (\textbf{c}ompression \textbf{r}ate).
 \end{itemize}
 
 \pagebreak
@@ -152,7 +161,9 @@ já foi fornecida acima.
 \indent\indent Esta seção abordará detalhes do que foi feito na
 implementação para resolver o problema do EP2. Todas as definições e suposições
 feitas no enunciado já estão sendo consideradas para as explicações que se
-seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima seção.
+seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima seção. Ainda, há
+uma explicação adicional no final do caso bilinear (sobre a não necessidade de calcular o sistema linear
+apresentado mas apenas usar diretamente o seu resultado diretamente).
 
 \subsection{Caso Bilinear}
   \indent\indent Para resolver o problema de interpolação no caso bilinear, precisamos apenas
@@ -231,6 +242,15 @@ seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima
       f(x_{i + 1}, y_{j + 1})
     \end{pmatrix}$
   \end{center}
+
+
+  Assim, os 4 coeficientes $a_{ij}$ de cada polinômio interpolador de $v(x, y)$ podem ser calculados diretamente fazendo as seguintes computações na ordem explicitada abaixo:
+
+  \begin{enumerate}[label=\textbf{\roman*.}]
+    \item $a_{00} = f(x_i, y_j)$
+    \item $a_{10} = \frac{f(x_{i + 1}, y_j) - a_{00}}{h_x}$ e $a_{01} = \frac{f(x_i, y_{j + 1}) - a_{00}}{h_y}$
+    \item $a_{11} = \frac{f(x_{i + 1}, y_{j + 1}) - a_{00} - h_xa_{10} - h_ya_{01}}{h_xh_y}$
+  \end{enumerate}
 
 \subsection{Caso Bicúbico}
 
@@ -1343,10 +1363,203 @@ seguem. Para a resolução dos problemas do EP3, por favor, pule para a próxima
 
   \pagebreak
 
+  \section{Implementação: construindo e avaliando a v(x, y)}
+
+  \indent\indent Para construir os polinômios interpoladores $v(x, y)$, foi usada uma matriz $V$ do tamanho da malha, na qual cada posição $(x, y)$ conhecida da malha
+  tem seu polinômio interpolador $v(x, y)$ na mesma posição $(x, y)$ de $V$. Tal matriz $V$ contendo os polinômios $v(x, y)$ é construída usando a estrutura de dados \textit{Struct Array} do \textit{GNU-Octave},
+  de tal forma que os coeficientes são guardados de forma limpa e eficiente para cada polinômio. Assim, por exemplo, um valor de $f(x, y)$ que, na malha, pertença ao quadrado
+  $Q = \overline{P_{ij}P_{(i+1)j}P_{(i+1)(j+1)}P_{i(j+1)}}$, formado pelos pontos $P_{ij}, P_{(i+1)j}, P_{(i+1)(j+1)}$ e $P_{i(j+1)}$,
+  será interpolado pelo polinômio cujo os coeficientes estão guardados em $V_{ij}$.
+
+  A função {\ttfamily{constroiv}} recebe os parâmetros que definem a malha, a própria malha com os valores de \textbf{conhecidos} $f(x, y)$ e o modo (bicúbico ou bilinear) e internamente chama as funções
+  {\ttfamily{bilinear\_method}} ou {\ttfamily{bicubic\_method}} que devolverão a matriz $V$ contendo cada $v(x, y)$ com o número de coeficientes esperados (4 ou 16) para cada caso já computados. Em particular,
+  se o modo escolhido for o bicúbico, antes das chamadas à função {\ttfamily{bicubic\_method}} será feita uma chamada à função {\ttfamily{aproxdf}}, que computará as derivadas parciais discretas com as
+  aproximações deduzidas na seção anterior, com erros possuindo uma ordem de grandeza $O(h_x^2)$ ou $O(h_y^2)$, a depender da derivada em questão. Estas derivadas são retornadas em matrizes do tamanho da
+  malha, com seus valores computados para cada ponto conhecido, e são usadas de entrada para a função do modo bicúbico.
+
+  Já para realizar a avaliação de um determinado ponto $(x, y)$ qualquer, simplesmente buscamos o quadrado $Q = \overline{P_{ij}P_{(i+1)j}P_{(i+1)(j+1)}P_{i(j+1)}}$, formado pelos
+  \textit{pixels} $P_{ij}, P_{(i+1)j}, P_{(i+1)(j+1)}$ e $P_{i(j+1)}$, para podermos recuperar os coeficientes do polinômio interpolador esperado. Encontramos tal quadrado $Q$ usando os
+  parâmetros $h_x = \frac{b_x - a_x}{n_x}$ e $h_y = \frac{b_y - a_y}{n_y}$ definidos no enunciado, acumulando $h_x$ e $h_y$ em duas variáveis (uma para cada eixo) até que estas encontrem
+  a `área' a qual o ponto $(x, y)$ pertence na malha, recuperando também os índices que devem ser usadas na matriz $V$ para obter o polinômio interpolador $v(x, y)$. Uma vez com o polinômio,
+  basta realizar o cálculo normalmente considerando os valores de $x$ e de $y$ passados pelo usuário.
+
+  \textbf{Observação:} os valores de $x$ e de $y$ devem ser passados no programa de função, pois ali
+  o usuário define a malha. No modo imagem, conforme dúvida tirada com o monitor, a imagem é a própria malha e seus parâmetros são descobertos durante a execução. É importante ressaltar aqui que
+  as funções de ambos os programas possuem as mesmas implementações, com uma ou outra exceção tendo uma pequena variação (para tratamento de eventuais parâmetros distintos, como por exemplo
+  o fato do modo imagem trabalhar com uma malha para cada canal de cor).
+
+
+  \section{Compressão de decompressão de imagens}
+
+  \indent\indent O programa de modo de manipulação de imagem tem a diferença de aplicar a teoria para compressão e decompressão de imagens. Nesta seção será abordado
+  como isso foi realizado no EP3.
+
+  \textbf{Nota:} nesta seção, sempre que usarmos o termo $f(x, y)$, na verdade é para considerar que existem
+  três funções: $f_R(x, y), f_G(x, y)$ e $f_B(x, y)$, uma para cada canal de cor.
+
+  \subsection{Compressão}
+
+  \indent\indent Quando o programa de modo de manipulação de imagem inicializado, a primeira coisa que ele faz é buscar a imagem no diretório `{\ttfamily{./images}}' que foi especificada
+  na linha de comando para lê-la. Diferentemente do programa de função, que define diretamente a malha pelos parâmetros passados pela linha de comando, o programa de imagens irá antes fazer
+  a compressão da imagem para então considerar a imagem comprimida como a função $f(x, y)$.
+
+  A ação de compressão (e conseqüentemente decompressão) está diretamente relacionado à opção do usuário, uma vez que o parâmetro `{\ttfamily{--cr}}' passado pela linha de comando irá
+  definir o quanto da imagem será comprimida. Na versão que está sendo entregue, o valor mínimo para tal parâmetro é 5, conforme especificado na segunda seção deste documento. Ainda, está a cargo
+  do usuário passar uma imagem de dimensões condizentes com o valor passado no parâmetro. A imagem que está sendo entregue de exemplo, `{\ttfamily{./images/purple\_tentacle.jpg}}', foi testada extensivamente
+  com a taxa de compressão $cr = 5$.
+
+  A maneira que a taxa de compressão é usada pelo programa para comprimir a imagem é bastante simples: para um valor de $cr = n$ e uma imagem de tamanho $W \times L$, o que será feito é remover todas
+  as linhas $i$ e colunas $j$ que são divisíveis por $n$ da imagem. Ou seja, construímos uma nova imagem de tamanho $w \times l$, onde $w = W - \lfloor \frac{W}{n} \rfloor$ e $l = L - \lfloor \frac{L}{n} \rfloor$.
+  As únicas linhas e colunas que não removemos, porém, são as bordas, pois não há como saber que elas foram removidas durante a decompressão. Isso significa que a imagem comprimida pode ter também as dimensões
+  $ (W - \lfloor \frac{W}{n} \rfloor + 1) \times (L - \lfloor \frac{L}{n} \rfloor)$, $ (W - \lfloor \frac{W}{n} \rfloor) \times (L - \lfloor \frac{L}{n} \rfloor + 1)$ ou ainda
+  $ (W - \lfloor \frac{W}{n} \rfloor + 1) \times (L - \lfloor \frac{L}{n} \rfloor + 1)$, a depender do valor da dimensão da imagem original e da tava de compressão $cr$.
+
+  Abaixo é fornecido um exemplo ilustrativo da compressão. Considere $W = L = 5$ e $cr = 2$ e a cada célula de índice $(i, j)$. Note que a dimensão final será dada por $w = (5 - \lfloor \frac{5}{2} \rfloor) = 3$ e
+  $l = (5 - \lfloor \frac{5}{2} \rfloor) = 3$.
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c | c | c | c |}
+      \hline
+      (1, 1) \cellcolor{gray} & (1, 2) \cellcolor{gray} & (1, 3) \cellcolor{gray} & (1, 4) \cellcolor{gray} & (1, 5) \cellcolor{gray} \\
+      \hline
+      (2, 1) \cellcolor{gray} & (2, 2) \cellcolor{gray} & (2, 3) \cellcolor{gray} & (2, 4) \cellcolor{gray} & (2, 5) \cellcolor{gray} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 2) \cellcolor{gray} & (3, 3) \cellcolor{gray} & (3, 4) \cellcolor{gray} & (3, 5) \cellcolor{gray} \\
+      \hline
+      (4, 1) \cellcolor{gray} & (4, 2) \cellcolor{gray} & (4, 3) \cellcolor{gray} & (4, 4) \cellcolor{gray} & (4, 5) \cellcolor{gray} \\
+      \hline
+      (5, 1) \cellcolor{gray} & (5, 2) \cellcolor{gray} & (5, 3) \cellcolor{gray} & (5, 4) \cellcolor{gray} & (5, 5) \cellcolor{gray} \\
+      \hline
+    \end{tabular}
+    \caption*{Imagem Original}
+  \end{table}
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c | c | c | c |}
+      \hline
+      (1, 1) \cellcolor{gray} & (1, 2) \cellcolor{red} & (1, 3) \cellcolor{gray} & (1, 2) \cellcolor{red} & (1, 3) \cellcolor{gray} \\
+      \hline
+      (2, 1) \cellcolor{red} & (2, 2) \cellcolor{red} & (2, 3) \cellcolor{red}  & (2, 2) \cellcolor{red} & (2, 3) \cellcolor{red} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 2) \cellcolor{red} & (3, 3) \cellcolor{gray}  & (3, 2) \cellcolor{red} & (3, 3) \cellcolor{gray} \\
+      \hline
+      (2, 1) \cellcolor{red} & (2, 2) \cellcolor{red} & (2, 3) \cellcolor{red}  & (2, 2) \cellcolor{red} & (2, 3) \cellcolor{red} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 2) \cellcolor{red} & (3, 3) \cellcolor{gray}  & (3, 2) \cellcolor{red} & (3, 3) \cellcolor{gray} \\
+      \hline
+    \end{tabular}
+    \caption*{Imagem Original com as fileiras a serem removidas}
+  \end{table}
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c | c |}
+      \hline
+      (1, 1) \cellcolor{gray} & (1, 3) \cellcolor{gray} & (1, 5) \cellcolor{gray} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 3) \cellcolor{gray} & (3, 5) \cellcolor{gray} \\
+      \hline
+      (5, 1) \cellcolor{gray} & (5, 3) \cellcolor{gray} & (5, 5) \cellcolor{gray} \\
+      \hline
+    \end{tabular}
+    \caption*{Imagem Comprimida $f(x, y)$}
+  \end{table}
+
+  \pagebreak
+
+  \subsection{Decompressão}
+
+  \indent\indent A decompressão é o processo que busca recuperar a imagem original a partir da imagem comprimida $f(x, y)$ usando o método de interpolação escolhido. isso significa que,
+  quando o programa atinge este estágio, ele já calculou todas as derivadas parciais discretas da imagem e está preparado para tentar recuperar a imagem original.
+
+  Para recuperar a imagem original, a primeira coisa que o programa faz é ampliar a imagem, inserindo as fileiras de \textit{pixels} nas posições que foram removidas, usando a taxa de compressão $cr$.
+  Tal ação é realizada pela função `{\ttfamily{enlarge}}'. Para que isso funcione como esperado, a primeira tarefa que esta função faz é tentar descobrir o tamanho da imagem original, e a maneira
+  que ela faz isso é pelas expressões:
+
+  \begin{itemize}
+    \item $W' = round(\frac{(w - 1) \times cr}{cr - 1})$
+    \item $L' = round(\frac{(l - 1) \times cr}{cr - 1})$
+  \end{itemize}
+
+  É possível que existam perdas nesta transformação, a depender dos valores de $cr, w$ e $l$. É por isso que tomamos o cuidado de chamar as dimensoes recuperadas de $W'$ e $L'$. Um exemplo onde há perda
+  é para os valores $W = 12345$ e $cr = 7$, que resultará em $w = 12344$.
+
+  Em seguida, após ter acontecido a expansão da imagem comprimida, calculamos o valor dos \textit{pixels} das fileiras adicionadas a partir da interpolação. Buscamos o polinômio interpolador em $V$ apenas percorrendo
+  os índices da imagem expandida, e sempre que chegamos em uma linha com índice $p$ ou uma coluna com índice $q$ divisível por $cr$, obtemos os índices da linha $i$ e da coluna $j$ de $V$ a partir da seguinte expressão:
+
+  \begin{itemize}
+    \item $i = p - \lfloor \frac{p}{cr} \rfloor$
+    \item $j = q - \lfloor \frac{q}{cr} \rfloor$
+  \end{itemize}
+
+  Assim, o polinômio interpolador de coeficientes guardados em $V_{ij}$ será usado para atribuir o valor do novo \textit{pixel} adicionado na decompressão.
+  Além disso, para obter um resultado melhor, as informações da vizinhança do \textit{pixel} também são usadas, de tal forma que usamos os polinômios
+  interpoladores vizinhos para tentar conseguir um resultado mais próximo do esperado. Abaixo exemplos gráficos para ilustrar a decompressão.
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c | c |}
+      \hline
+      (1, 1) \cellcolor{gray} & (1, 3) \cellcolor{gray} & (1, 5) \cellcolor{gray} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 3) \cellcolor{gray} & (3, 5) \cellcolor{gray} \\
+      \hline
+      (5, 1) \cellcolor{gray} & (5, 3) \cellcolor{gray} & (5, 5) \cellcolor{gray} \\
+      \hline
+    \end{tabular}
+    \caption*{Imagem Comprimida $f(x, y)$. $V(x, y)$ tem a mesma dimensão}
+  \end{table}
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c | c | c | c |}
+      \hline
+      (1, 1) \cellcolor{gray} & (1, 2) \cellcolor{blue} & (1, 3) \cellcolor{gray} & (1, 2) \cellcolor{blue} & (1, 3) \cellcolor{gray} \\
+      \hline
+      (2, 1) \cellcolor{blue} & (2, 2) \cellcolor{blue} & (2, 3) \cellcolor{blue} & (2, 2) \cellcolor{blue} & (2, 3) \cellcolor{blue} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 2) \cellcolor{blue} & (3, 3) \cellcolor{gray} & (3, 2) \cellcolor{blue} & (3, 3) \cellcolor{gray} \\
+      \hline
+      (2, 1) \cellcolor{blue} & (2, 2) \cellcolor{blue} & (2, 3) \cellcolor{blue} & (2, 2) \cellcolor{blue} & (2, 3) \cellcolor{blue} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 2) \cellcolor{blue} & (3, 3) \cellcolor{gray} & (3, 2) \cellcolor{blue} & (3, 3) \cellcolor{gray} \\
+      \hline
+    \end{tabular}
+    \caption*{Imagem Comprimida expandida. \textit{Pixels} adicionados em azul}
+  \end{table}
+
+  Agora, a depender da posição do \textit{pixel} desonhecido, o seu novo valor será a \textbf{média aritmética do valor dos polinômios interpoladores dos seus vizinhos de cor cinza}, chutando
+  para cada \textit{pixel cinza} um valor $(x, y)$ que pertença àquele quadrado e chamando a nossa função {\ttfamily{avaliav}}. Finalmente, devemos ter algo teoricamente similar ao representado na última ilustração,
+  logo abaixo.
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c | c | c | c |}
+      \hline
+      (1, 1) \cellcolor{gray} & (1, 2) \cellcolor{apx1} & (1, 3) \cellcolor{gray} & (1, 4) \cellcolor{apx3} & (1, 5) \cellcolor{gray} \\
+      \hline
+      (2, 1) \cellcolor{apx1} & (2, 2) \cellcolor{apx1} & (2, 3) \cellcolor{apx2} & (2, 4) \cellcolor{apx2} & (2, 5) \cellcolor{apx3} \\
+      \hline
+      (3, 1) \cellcolor{gray} & (3, 2) \cellcolor{apx2} & (3, 3) \cellcolor{gray} & (3, 4) \cellcolor{apx2} & (3, 5) \cellcolor{gray} \\
+      \hline
+      (4, 1) \cellcolor{apx1} & (4, 2) \cellcolor{apx3} & (4, 3) \cellcolor{apx2} & (4, 4) \cellcolor{apx4} & (4, 5) \cellcolor{apx4} \\
+      \hline
+      (5, 1) \cellcolor{gray} & (5, 2) \cellcolor{apx3} & (5, 3) \cellcolor{gray} & (5, 4) \cellcolor{apx4} & (5, 5) \cellcolor{gray} \\
+      \hline
+    \end{tabular}
+    \caption*{Imagem Descomprimida}
+  \end{table}
+
+  \pagebreak
+
+  \section{Testes e análises de resultados}
+
   \section{Considerações Finais (e pessoais)}
 
   \indent\indent Do EP2 para este, resolvi alguns problemas de falta de conhecimento que tinha com o \textit{GNU-Octave} para oferecer um código mais limpo e eficiente. A qualidade do código
-  com relação ao último EP está incomparavelmente superior, e desta vez eu estou entregando o EP satisfeito com os resultados obtidos e a qualidade do código. \textbf{:p}
+  com relação ao último EP está incomparavelmente superior, e desta vez eu estou entregando o EP satisfeito com os resultados obtidos e a qualidade do código.
 
   Com relação à manipulação de imagens, o problema que eu tive com os índices no EP2 foi aparentemente resolvido neste EP, dado que eu consegui atingir resultados deveras satisfatórios para a interpolação da imagem exemplo.
   Este EP3 não foi feito copiando e colando o EP2 e `melhorando as partes ruins'. Tudo foi replanejado e reimplementado, ora até usando outras estruturas de dados, tal como \textit{Struct Arrays}.

@@ -20,16 +20,15 @@ function [img, mode, compression_rate] = extract(args)
     elseif strcmp("--cr", args{i}) && (i < length(args))
       try
         compression_rate = str2num(args{i + 1});
-        if compression_rate <= 1
-          printf("Compression rate must be an integer > 1.");
+        if compression_rate < 5
+          printf("Compression rate must be an integer >= 5.");
           exit;
         elseif (compression_rate - floor(compression_rate)) > 0
-          printf("Compression rate must be an integer > 1.");
+          printf("Compression rate must be an integer >= 5.");
           exit;
         endif
       catch
-        compression_rate
-        printf("Compression rate must be an integer > 1.");
+        printf("Compression rate must be an integer >= 5.");
         exit;
       end_try_catch
     elseif strcmp("--bicubic", args{i})

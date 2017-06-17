@@ -15,11 +15,11 @@ function main(args)
   fx = get_image_matrix(nx, ny, ax, ay, bx, by, hx, hy, f);
 
   # Compute coefficients
-  vx = build_v(mode, fx, ax, ay, bx, by, hx, hy);
+  vx = constroiv(mode, fx, ax, ay, bx, by, hx, hy);
 
   # Evaluate a given point (x, y) using vx
   printf("Evaluating f(x = %g, y = %g)...\n", x, y);
-  z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
+  z = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode);
   printf("Done!\n");
 
   printf("f(x = %g, y = %g) = %g\n", x, y, f(x, y));
@@ -39,11 +39,11 @@ function main(args)
     fx = get_image_matrix(nx, ny, ax, ay, bx, by, hx, hy, f);
 
     # Compute coefficients
-    vx = build_v(mode, fx, ax, ay, bx, by, hx, hy);
+    vx = constroiv(mode, fx, ax, ay, bx, by, hx, hy);
 
     # Evaluate a given point (x, y) using vx
     printf("Evaluating f(x = %g, y = %g)...\n", x, y);
-    new_z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
+    new_z = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode);
     err2 = abs(f(x, y) - new_z);
     printf("\nold_v(x = %g, y = %g) = %g\n", x, y, z);
     printf("new_v(x = %g, y = %g) = %g\n", x, y, new_z);
@@ -67,7 +67,7 @@ function interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f)
     x = ax;
     while column < columns(vx)
       a = f(x + hx, y + hy);
-      b = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode);
+      b = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode);
       sum += abs(a - b);
       #OCTAVEBUG?:
       #printf("%f  %f\n", a, b);
@@ -85,7 +85,7 @@ function interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f)
 endfunction
 
 # Evaluate a given point (x, y) in vx (interpolates (x,y))
-function z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode)
+function z = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode)
   row = rows(vx);
   yy = ay;
   while row > 1
@@ -120,7 +120,7 @@ function z = evaluate_v(vx, x, y, ax, ay, bx, by, hx, hy, mode)
 endfunction
 
 # Build v(x, y)
-function vx = build_v(mode, fx, ax, ay, bx, by, hx, hy)
+function vx = constroiv(mode, fx, ax, ay, bx, by, hx, hy)
   if mode == 0
     printf("Computing bilinear mode coefficients for f(x, y)... ");
     vx = bilinear_method(fx, hx, hy);

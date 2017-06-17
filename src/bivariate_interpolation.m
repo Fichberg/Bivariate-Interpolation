@@ -24,7 +24,7 @@ function main(args)
   printf("Done!\n");
 
   # Compute coefficients
-  [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy);
+  [vx_R, vx_G, vx_B] = constroiv(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy);
 
   # Enlarge image. gx will be our decompressed image
   printf("Enlarging compressed image for the \033[0;31mR\033[0m\033[0;32mG\033[0m\033[0;34mB\033[0m channels... ");
@@ -57,7 +57,7 @@ function fx = build_image(fx_R, fx_G, fx_B)
 endfunction
 
 # Evaluate a given point (x, y) in vx (interpolates (x,y))
-function z = evaluate_v(vx, row, col, x, y, mode)
+function z = avaliav(vx, row, col, x, y, mode)
   if mode == 0
     z = vx(row, col).c0 + (vx(row, col).c1 * (x - col)) + (vx(row, col).c2 * (y - row)) + (vx(row, col).c3 * ((x - col) * (y - row)));
   else
@@ -82,7 +82,7 @@ function [gx_R, gx_G, gx_B] = estimate_pixel_values(gx_R, gx_G, gx_B, vx_R, vx_G
     if rem(gx_row, compression_rate) == 0
       while gx_col <= columns(gx_R)
         vx_col = gx_col - floor(gx_col / compression_rate);
-        [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode);
+        [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, compression_rate, mode);
         gx_R(gx_row, gx_col) = round(z_R);
         gx_G(gx_row, gx_col) = round(z_G);
         gx_B(gx_row, gx_col) = round(z_B);
@@ -93,7 +93,7 @@ function [gx_R, gx_G, gx_B] = estimate_pixel_values(gx_R, gx_G, gx_B, vx_R, vx_G
       while gx_col <= columns(gx_R)
         if rem(gx_col, compression_rate) == 0
           vx_col = gx_col - floor(gx_col / compression_rate);
-          [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode);
+          [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, compression_rate, mode);
           gx_R(gx_row, gx_col) = round(z_R);
           gx_G(gx_row, gx_col) = round(z_G);
           gx_B(gx_row, gx_col) = round(z_B);
@@ -108,57 +108,81 @@ function [gx_R, gx_G, gx_B] = estimate_pixel_values(gx_R, gx_G, gx_B, vx_R, vx_G
 endfunction
 
 # Compute unknown pixel value considering the mean of the interpolation values of known neightboor pixels
-function [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, mode)
+function [z_R, z_G, z_B] = pixel_neighborhood_mean(vx_R, vx_G, vx_B, gx_row, gx_col, vx_row, vx_col, ax, ay, bx, by, hx, hy, compression_rate, mode)
   z_R = z_G = z_B = 0;
   if (left_border_pixel(ax, gx_col) && bot_border_pixel(ay, gx_row)) || (left_border_pixel(ax, gx_col) && top_border_pixel(by, gx_row)) || (right_border_pixel(bx, gx_col) && bot_border_pixel(ay, gx_row)) || (right_border_pixel(bx, gx_col) && top_border_pixel(by, gx_row))
     x = vx_col + (hx / 100.0);
     y = vx_row + (hy / 100.0);
-    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
-    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
-    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+    z_R += avaliav(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += avaliav(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += avaliav(vx_B, vx_row, vx_col, x, y, mode);
   elseif left_border_pixel(ax, gx_col) || right_border_pixel(bx, gx_col)
     denominator = 2;
     x = vx_col + (hx / 100.0);
     y = vx_row + (hy / 100.0);
-    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
-    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
-    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+    z_R += avaliav(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += avaliav(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += avaliav(vx_B, vx_row, vx_col, x, y, mode);
     y = (vx_row + 1) + (hy / 100.0);
-    z_R += evaluate_v(vx_R, (vx_row - 1), vx_col, x, y, mode);
-    z_G += evaluate_v(vx_G, (vx_row - 1), vx_col, x, y, mode);
-    z_B += evaluate_v(vx_B, (vx_row - 1), vx_col, x, y, mode);
+    z_R += avaliav(vx_R, (vx_row - 1), vx_col, x, y, mode);
+    z_G += avaliav(vx_G, (vx_row - 1), vx_col, x, y, mode);
+    z_B += avaliav(vx_B, (vx_row - 1), vx_col, x, y, mode);
     z_R /= 2; z_G /= 2; z_B /= 2;
   elseif bot_border_pixel(ay, gx_row) || top_border_pixel(by, gx_row)
     denominator = 2;
     x = vx_col + (hx / 100.0);
     y = vx_row + (hy / 100.0);
-    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
-    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
-    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+    z_R += avaliav(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += avaliav(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += avaliav(vx_B, vx_row, vx_col, x, y, mode);
     x = (vx_col - 1) + (hx / 100.0);
-    z_R += evaluate_v(vx_R, vx_row, (vx_col - 1), x, y, mode);
-    z_G += evaluate_v(vx_G, vx_row, (vx_col - 1), x, y, mode);
-    z_B += evaluate_v(vx_B, vx_row, (vx_col - 1), x, y, mode);
+    z_R += avaliav(vx_R, vx_row, (vx_col - 1), x, y, mode);
+    z_G += avaliav(vx_G, vx_row, (vx_col - 1), x, y, mode);
+    z_B += avaliav(vx_B, vx_row, (vx_col - 1), x, y, mode);
+    z_R /= 2; z_G /= 2; z_B /= 2;
+  elseif rem(gx_row, compression_rate) == 0 && rem(gx_col, compression_rate) != 0
+    denominator = 2;
+    x = vx_col + (hx / 100.0);
+    y = vx_row + (hy / 100.0);
+    z_R += avaliav(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += avaliav(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += avaliav(vx_B, vx_row, vx_col, x, y, mode);
+    y = (vx_row + 1) + (hy / 100.0);
+    z_R += avaliav(vx_R, (vx_row - 1), vx_col, x, y, mode);
+    z_G += avaliav(vx_G, (vx_row - 1), vx_col, x, y, mode);
+    z_B += avaliav(vx_B, (vx_row - 1), vx_col, x, y, mode);
+    z_R /= 2; z_G /= 2; z_B /= 2;
+  elseif rem(gx_row, compression_rate) != 0 && rem(gx_col, compression_rate) == 0
+    denominator = 2;
+    x = vx_col + (hx / 100.0);
+    y = vx_row + (hy / 100.0);
+    z_R += avaliav(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += avaliav(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += avaliav(vx_B, vx_row, vx_col, x, y, mode);
+    x = (vx_col - 1) + (hx / 100.0);
+    z_R += avaliav(vx_R, vx_row, (vx_col - 1), x, y, mode);
+    z_G += avaliav(vx_G, vx_row, (vx_col - 1), x, y, mode);
+    z_B += avaliav(vx_B, vx_row, (vx_col - 1), x, y, mode);
     z_R /= 2; z_G /= 2; z_B /= 2;
   else
     denominator = 4;
     x = vx_col + (hx / 100.0);
     y = vx_row + (hy / 100.0);
-    z_R += evaluate_v(vx_R, vx_row, vx_col, x, y, mode);
-    z_G += evaluate_v(vx_G, vx_row, vx_col, x, y, mode);
-    z_B += evaluate_v(vx_B, vx_row, vx_col, x, y, mode);
+    z_R += avaliav(vx_R, vx_row, vx_col, x, y, mode);
+    z_G += avaliav(vx_G, vx_row, vx_col, x, y, mode);
+    z_B += avaliav(vx_B, vx_row, vx_col, x, y, mode);
     x = (vx_col - 1) + (hx / 100.0);
-    z_R += evaluate_v(vx_R, vx_row, (vx_col - 1), x, y, mode);
-    z_G += evaluate_v(vx_G, vx_row, (vx_col - 1), x, y, mode);
-    z_B += evaluate_v(vx_B, vx_row, (vx_col - 1), x, y, mode);
+    z_R += avaliav(vx_R, vx_row, (vx_col - 1), x, y, mode);
+    z_G += avaliav(vx_G, vx_row, (vx_col - 1), x, y, mode);
+    z_B += avaliav(vx_B, vx_row, (vx_col - 1), x, y, mode);
     y = (vx_row + 1) + (hy / 100.0);
-    z_R += evaluate_v(vx_R, (vx_row - 1), (vx_col - 1), x, y, mode);
-    z_G += evaluate_v(vx_G, (vx_row - 1), (vx_col - 1), x, y, mode);
-    z_B += evaluate_v(vx_B, (vx_row - 1), (vx_col - 1), x, y, mode);
+    z_R += avaliav(vx_R, (vx_row - 1), (vx_col - 1), x, y, mode);
+    z_G += avaliav(vx_G, (vx_row - 1), (vx_col - 1), x, y, mode);
+    z_B += avaliav(vx_B, (vx_row - 1), (vx_col - 1), x, y, mode);
     x = vx_col + (hx / 100.0);
-    z_R += evaluate_v(vx_R, (vx_row - 1), vx_col, x, y, mode);
-    z_G += evaluate_v(vx_G, (vx_row - 1), vx_col, x, y, mode);
-    z_B += evaluate_v(vx_B, (vx_row - 1), vx_col, x, y, mode);
+    z_R += avaliav(vx_R, (vx_row - 1), vx_col, x, y, mode);
+    z_G += avaliav(vx_G, (vx_row - 1), vx_col, x, y, mode);
+    z_B += avaliav(vx_B, (vx_row - 1), vx_col, x, y, mode);
     z_R /= 4; z_G /= 4; z_B /= 4;
   endif
 endfunction
@@ -166,8 +190,8 @@ endfunction
 # Enlarge compressed image to return to its original dimensions
 function [gx_R, gx_G, gx_B] = enlarge(fx_R, fx_G, fx_B, compression_rate)
   gx_R = []; gx_G = []; gx_B = [];
-  gx_rows = ((rows(fx_R) - 1)    * compression_rate) / (compression_rate - 1);
-  gx_cols = ((columns(fx_R) - 1) * compression_rate) / (compression_rate - 1);
+  gx_rows = round(((rows(fx_R) - 1)    * compression_rate) / (compression_rate - 1));
+  gx_cols = round(((columns(fx_R) - 1) * compression_rate) / (compression_rate - 1));
   [nx, ny, ax, ay, bx, by, hx, hy] = get_image_parameters(fx_R);
 
   fx_row = rows(fx_R);
@@ -211,7 +235,7 @@ function [gx_R, gx_G, gx_B] = enlarge(fx_R, fx_G, fx_B, compression_rate)
   endwhile
 endfunction
 
-function [vx_R, vx_G, vx_B] = build_v(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy)
+function [vx_R, vx_G, vx_B] = constroiv(mode, fx_R, fx_G, fx_B, ax, ay, bx, by, hx, hy)
   if mode == 0
     printf("Computing bilinear mode coefficients for the compressed image (\033[0;31mred channel\033[0m)... ");
     vx_R = bilinear_method(fx_R, hx, hy);
