@@ -142,8 +142,6 @@ Exemplo válido de invocação do \textit{script} de funções:
   \item Teste de verificação: o programa irá tentar mostrar ao usuário que, para os valores de parâmetros escolhidos, $v$ interpola $f$ nos pontos da malha. Ou seja, será mostrado
   que para todos os pontos $(x, y)$ da malha, $|f(x, y) - v(x, y)| = 0$.
 
-  \textbf{Nota importante:} Aparentemente foi encontrado um bug no \textit{GNU-Octave}. O exemplo fornecido abaixo para rodar
-  o programa neste modo o reproduz. O teste ira acusar como falho, mas os valores de `a' e `b' são iguais, conforme pode ser evidenciado ao remover o comentário do \textit{printf} da função `interpolation\_verification\_test'.
   \item Teste de comportamento do erro: se o programa detectar que a área é quadrada, isto é, $h_x = h_y$, serão \textit{duplicados} os valores dos parâmetros $n_x$ e $n_y$ de forma a mostrar
   que o erro diminui com o aumento da quantidade de pontos na malha fina (em outras palavras, quando tornamos a malha fina mais densa, fazendo \textit{h} se aproximar mais de zero. $h_x = h_y = h \rightarrow 0$) .
   A depender dos valores iniciais de $n_x$ e $n_y$ e os valores das coordenadas do ponto $(x, y)$, claro, \textit{podem haver casos em que o teste falhe}, pois, por exemplo, o ponto $(x, y)$

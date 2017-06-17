@@ -5,7 +5,7 @@ argument_checker;
 
 function main(args)
   # Select a function f
-  f = @f1;
+  f = @f2;
 
   # Get arguments
   [nx, ny, ax, ay, bx, by, mode, x, y] = extract2(args);
@@ -67,18 +67,21 @@ function interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f)
     while column < columns(vx)
       a = f(x, y);
       b = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode);
-      if abs(a - b) > 1e-12
+      if abs(a - b) != 0
         failed = true;
         break;
       endif
       x += hx;
       column++;
     endwhile
+    if failed
+      break;
+    endif
     y += hy;
     row--;
   endwhile
   if !failed
-    printf("|f(x, y) - v(x, y)| for every grid point (x, y) is zero or the difference is really small to consider (successful interpolation).\n");
+    printf("|f(x, y) - v(x, y)| for every grid point (x, y) is zero (successful interpolation).\n");
   else
     printf("Odd. This sum should really be equal to zero...\n");
   endif
@@ -89,7 +92,7 @@ function z = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode)
   row = rows(vx);
   yy = ay;
   while row > 1
-    if yy <= y && y <= (yy + hy)
+    if yy <= y && y < (yy + hy)
       break;
     endif
     yy += hy;
@@ -99,7 +102,7 @@ function z = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode)
   col = 1;
   xx = ax;
   while col < columns(vx)
-    if xx <= x && x <= (xx + hx)
+    if xx <= x && x < (xx + hx)
       break;
     endif
     xx += hx;
