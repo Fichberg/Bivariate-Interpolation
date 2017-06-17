@@ -27,7 +27,6 @@ function main(args)
   err = abs(f(x, y) - z);
 
   printf("Performing interpolation verification test...\n");
-  printf("WARNING: if you get the 'Odd' message, uncomment the print in the function 'interpolation_verification_test' and run again checking the print values to see that 'a' and 'b' are equal. It seems there is a bug in Octave...\n");
   interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f);
   printf("Done!\n");
 
@@ -59,26 +58,27 @@ endfunction
 # Interpolation verification test
 function interpolation_verification_test(vx, ax, ay, bx, by, hx, hy, mode, f)
   y = ay;
-  sum = 0;
+  failed = false;
   row = rows(vx);
 
   while row > 1
     column = 1;
     x = ax;
     while column < columns(vx)
-      a = f(x + hx, y + hy);
+      a = f(x, y);
       b = avaliav(vx, x, y, ax, ay, bx, by, hx, hy, mode);
-      sum += abs(a - b);
-      #OCTAVEBUG?:
-      #printf("%f  %f\n", a, b);
+      if abs(a - b) > 1e-12
+        failed = true;
+        break;
+      endif
       x += hx;
       column++;
     endwhile
     y += hy;
     row--;
   endwhile
-  if sum == 0
-    printf("Sum is %g. Therefore, |f(x, y) - v(x, y)| for every grid point (x, y) is zero, as expected (successful interpolation).\n", sum);
+  if !failed
+    printf("|f(x, y) - v(x, y)| for every grid point (x, y) is zero or the difference is really small to consider (successful interpolation).\n");
   else
     printf("Odd. This sum should really be equal to zero...\n");
   endif
@@ -303,18 +303,26 @@ function fx = get_image_matrix(nx, ny, ax, ay, bx, by, hx, hy, f)
     j = ax;
     row = [];
     while j <= bx
-      row = [f(j, i), row];
+      row = [row, f(j, i)];
       j += hx;
     endwhile
-    fx = [fx; row];
+    fx = [row; fx];
     i += hy;
   endwhile
 endfunction
 
 # Test functions
 ##############################################################
+function z = f0(x, y)
+  z = x^2 + y^2;
+endfunction
+
 function z = f1(x, y)
-  z = x^3 + y^3;
+  z = x^3  + y^3;
+endfunction
+
+function z = f2(x, y)
+  z = x^2 + x^3 * y + y^2;
 endfunction
 
 main(argv());
