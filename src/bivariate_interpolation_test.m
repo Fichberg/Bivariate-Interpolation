@@ -5,7 +5,7 @@ argument_checker;
 
 function main(args)
   # Select a function f
-  f = @f2;
+  f = @f1;
 
   # Get arguments
   [nx, ny, ax, ay, bx, by, mode, x, y] = extract2(args);
@@ -50,7 +50,7 @@ function main(args)
     printf("Done!\n");
     printf("|f(x , y) - old_v(x, y)| = %g\n", err);
     printf("|f(x , y) - new_v(x, y)| = %g\n", err2);
-    printf("|f(x , y) - new_v(x, y)| / |f(x , y) - old_v(x, y)| = %g\n", err2 / err);
+    printf("|f(x , y) - old_v(x, y)| / |f(x , y) - new_v(x, y)| = %g\n", err / err2);
   endif
 
 endfunction
